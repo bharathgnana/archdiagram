@@ -116,3 +116,9 @@ tests/              stdlib unittest suite
 ```bash
 python -m unittest discover -s tests
 ```
+
+## Contributing
+
+Anyone can clone, install (`pip install -e .`), and use it. To propose changes,
+fork and open a pull request - see [`CONTRIBUTING.md`](CONTRIBUTING.md) for the
+dev setup and workflow.
