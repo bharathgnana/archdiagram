@@ -1,5 +1,9 @@
 # archdiagram
 
+[![CI](https://github.com/bharathgnana/archdiagram/actions/workflows/ci.yml/badge.svg)](https://github.com/bharathgnana/archdiagram/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
+
 Turn an architecture description into an **editable diagram whose nodes are the official vendor
 service icons** (Azure App Service, AKS, Key Vault, S3, GKE, ...) - not a flowchart of labelled
 boxes.
@@ -17,6 +21,14 @@ JSON **spec**; the deterministic Python core renders that spec to:
 > references, so those render blank on import. `.drawio`/`.vsdx` therefore **embed** icons
 > (`--drawio-mode portable`) to maximise render success, and the **PDF** is the reliable
 > icons-always-render deliverable for Lucid.
+
+## Gallery
+
+Rendered from the specs in [`examples/`](examples/) - same engine, real vendor icons.
+
+| Azure | AWS | GCP |
+|-------|-----|-----|
+| ![Azure AI Foundry](docs/azure_foundry.png) | ![AWS](docs/aws_kelvin.png) | ![GCP](docs/gcp_agentic.png) |
 
 ## Design constraints
 
