@@ -1,0 +1,30 @@
+{
+  "title": "Kelvin AI on AWS",
+  "direction": "LR",
+  "groups": [
+    { "id": "vpc", "label": "Virtual private cloud (VPC)", "vendor": "aws" },
+    { "id": "customer", "label": "Customer account", "vendor": "aws" },
+    { "id": "integrations", "label": "Integrations", "vendor": "aws" }
+  ],
+  "nodes": [
+    { "id": "ec2", "service": "aws.ec2", "label": "EC2 Kelvin Nodes", "group": "customer" },
+    { "id": "alb", "service": "aws.alb", "label": "App Load Balancer", "group": "vpc" },
+    { "id": "eks", "service": "aws.eks", "label": "EKS (Kelvin cluster)", "group": "vpc" },
+    { "id": "rds", "service": "aws.rds", "label": "Amazon RDS", "group": "vpc" },
+    { "id": "sns", "service": "aws.sns", "label": "Amazon SNS", "group": "vpc" },
+    { "id": "s3", "service": "aws.s3", "label": "Amazon S3", "group": "integrations" },
+    { "id": "sitewise", "service": "aws.iot_sitewise", "label": "IoT SiteWise", "group": "integrations" },
+    { "id": "quicksight", "service": "aws.quicksight", "label": "QuickSight", "group": "integrations" },
+    { "id": "sagemaker", "service": "aws.sagemaker", "label": "SageMaker", "group": "integrations" }
+  ],
+  "edges": [
+    { "source": "ec2", "target": "alb", "label": "ingest" },
+    { "source": "alb", "target": "eks" },
+    { "source": "eks", "target": "rds" },
+    { "source": "eks", "target": "sns" },
+    { "source": "eks", "target": "s3" },
+    { "source": "eks", "target": "sitewise" },
+    { "source": "eks", "target": "sagemaker" },
+    { "source": "eks", "target": "quicksight" }
+  ]
+}

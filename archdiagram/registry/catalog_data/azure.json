@@ -1,0 +1,107 @@
+{
+  "vendor": "azure",
+  "accent": "#0078D4",
+  "_icons": "Official Microsoft Azure icons (SVG), fetched from the diagrams.net-hosted azure2 set, which mirrors Microsoft's official Azure architecture icon pack.",
+  "services": {
+    "app_service": {
+      "label": "App Service",
+      "native": "sketch=0;aspect=fixed;html=1;align=center;image;fontSize=12;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/app_services/App_Services.svg;",
+      "icon": "azure/app_services.svg", "w": 48, "h": 48
+    },
+    "aks": {
+      "label": "AKS",
+      "native": "sketch=0;aspect=fixed;html=1;align=center;image;fontSize=12;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/containers/Kubernetes_Services.svg;",
+      "icon": "azure/kubernetes_services.svg", "w": 48, "h": 48
+    },
+    "key_vault": {
+      "label": "Key Vault",
+      "native": "sketch=0;aspect=fixed;html=1;align=center;image;fontSize=12;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/security/Key_Vaults.svg;",
+      "icon": "azure/key_vaults.svg", "w": 48, "h": 48
+    },
+    "vm": {
+      "label": "Virtual Machine",
+      "native": "sketch=0;aspect=fixed;html=1;align=center;image;fontSize=12;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/compute/Virtual_Machine.svg;",
+      "icon": "azure/virtual_machine.svg", "w": 48, "h": 48
+    },
+    "sql_database": {
+      "label": "SQL Database",
+      "native": "sketch=0;aspect=fixed;html=1;align=center;image;fontSize=12;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/databases/SQL_Database.svg;",
+      "icon": "azure/sql_database.svg", "w": 48, "h": 48
+    },
+    "storage_account": {
+      "label": "Storage Account",
+      "native": "sketch=0;aspect=fixed;html=1;align=center;image;fontSize=12;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/storage/Storage_Accounts.svg;",
+      "icon": "azure/storage_accounts.svg", "w": 48, "h": 48
+    },
+    "application_gateway": {
+      "label": "Application Gateway",
+      "native": "sketch=0;aspect=fixed;html=1;align=center;image;fontSize=12;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/networking/Application_Gateways.svg;",
+      "icon": "azure/application_gateways.svg", "w": 48, "h": 48
+    },
+    "cosmos_db": {
+      "label": "Cosmos DB",
+      "native": "sketch=0;aspect=fixed;html=1;align=center;image;fontSize=12;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/databases/Azure_Cosmos_DB.svg;",
+      "icon": "azure/cosmos_db.svg", "w": 48, "h": 48
+    },
+    "function_app": {
+      "label": "Function App",
+      "native": "sketch=0;aspect=fixed;html=1;align=center;image;fontSize=12;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/compute/Function_Apps.svg;",
+      "icon": "azure/function_apps.svg", "w": 48, "h": 48
+    },
+    "service_bus": {
+      "label": "Service Bus",
+      "native": "sketch=0;aspect=fixed;html=1;align=center;image;fontSize=12;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/integration/Service_Bus.svg;",
+      "icon": "azure/service_bus.svg", "w": 48, "h": 48
+    },
+    "openai": {
+      "label": "Azure OpenAI",
+      "native": "sketch=0;aspect=fixed;html=1;align=center;image;fontSize=12;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/ai_machine_learning/Azure_OpenAI.svg;",
+      "icon": "azure/azure_openai.svg", "w": 48, "h": 48
+    },
+    "ai_foundry": {
+      "label": "AI Foundry",
+      "native": "sketch=0;aspect=fixed;html=1;align=center;image;fontSize=12;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/ai_machine_learning/AI_Studio.svg;",
+      "icon": "azure/ai_studio.svg", "w": 48, "h": 48
+    },
+    "firewall": {
+      "label": "Azure Firewall",
+      "native": "sketch=0;aspect=fixed;html=1;align=center;image;fontSize=12;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/networking/Firewalls.svg;",
+      "icon": "azure/firewalls.svg", "w": 48, "h": 48
+    },
+    "bastion": {
+      "label": "Azure Bastion",
+      "native": "sketch=0;aspect=fixed;html=1;align=center;image;fontSize=12;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/networking/Bastions.svg;",
+      "icon": "azure/bastions.svg", "w": 48, "h": 48
+    },
+    "ddos_protection": {
+      "label": "DDoS Protection",
+      "native": "sketch=0;aspect=fixed;html=1;align=center;image;fontSize=12;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/networking/DDoS_Protection_Plans.svg;",
+      "icon": "azure/ddos_protection_plans.svg", "w": 48, "h": 48
+    },
+    "virtual_network": {
+      "label": "Virtual Network",
+      "native": "sketch=0;aspect=fixed;html=1;align=center;image;fontSize=12;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/networking/Virtual_Networks.svg;",
+      "icon": "azure/virtual_networks.svg", "w": 48, "h": 48
+    },
+    "application_insights": {
+      "label": "Application Insights",
+      "native": "sketch=0;aspect=fixed;html=1;align=center;image;fontSize=12;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/devops/Application_Insights.svg;",
+      "icon": "azure/application_insights.svg", "w": 48, "h": 48
+    },
+    "monitor": {
+      "label": "Azure Monitor",
+      "native": "sketch=0;aspect=fixed;html=1;align=center;image;fontSize=12;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/management_governance/Monitor.svg;",
+      "icon": "azure/monitor.svg", "w": 48, "h": 48
+    },
+    "entra_id": {
+      "label": "Microsoft Entra ID",
+      "native": "sketch=0;aspect=fixed;html=1;align=center;image;fontSize=12;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/identity/Azure_Active_Directory.svg;",
+      "icon": "azure/entra_id.svg", "w": 48, "h": 48
+    },
+    "managed_identity": {
+      "label": "Managed Identity",
+      "native": "sketch=0;aspect=fixed;html=1;align=center;image;fontSize=12;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/identity/Managed_Identities.svg;",
+      "icon": "azure/managed_identities.svg", "w": 48, "h": 48
+    }
+  }
+}

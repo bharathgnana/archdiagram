@@ -1,0 +1,23 @@
+{
+  "title": "Web platform on Azure",
+  "direction": "LR",
+  "groups": [
+    { "id": "app", "label": "Application tier", "vendor": "azure" },
+    { "id": "data", "label": "Data tier", "vendor": "azure" }
+  ],
+  "nodes": [
+    { "id": "agw", "service": "azure.application_gateway", "label": "App Gateway" },
+    { "id": "web", "service": "azure.app_service", "label": "Web App", "group": "app" },
+    { "id": "aks", "service": "azure.aks", "label": "AKS", "group": "app" },
+    { "id": "kv", "service": "azure.key_vault", "label": "Key Vault", "group": "app" },
+    { "id": "sql", "service": "azure.sql_database", "label": "SQL DB", "group": "data" },
+    { "id": "cosmos", "service": "azure.cosmos_db", "label": "Cosmos DB", "group": "data" }
+  ],
+  "edges": [
+    { "source": "agw", "target": "web", "label": "https" },
+    { "source": "web", "target": "aks", "label": "api" },
+    { "source": "aks", "target": "kv", "label": "secrets" },
+    { "source": "aks", "target": "sql" },
+    { "source": "aks", "target": "cosmos" }
+  ]
+}

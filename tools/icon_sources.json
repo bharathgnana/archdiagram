@@ -1,0 +1,43 @@
+{
+  "_comment": "Override map: catalog icon relpath -> source URL. Azure icons are auto-derived from each entry's draw.io 'native' img/lib path (Microsoft official SVGs) and need no entry here. AWS/GCP providers ship official icons only as ZIP packs, so these point at the official-derived PlantUML icon repos (PNG). Kubernetes uses the official kubernetes/community SVGs. To use the official vendor SVG packs, extract them into the icon cache (same relpaths) or replace these URLs.",
+  "sources": {
+    "aws/s3.png": "https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/main/dist/Storage/SimpleStorageService.png",
+    "aws/lambda.png": "https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/main/dist/Compute/Lambda.png",
+    "aws/ec2.png": "https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/main/dist/Compute/EC2.png",
+    "aws/rds.png": "https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/main/dist/Database/RDS.png",
+    "aws/dynamodb.png": "https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/main/dist/Database/DynamoDB.png",
+    "aws/api_gateway.png": "https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/main/dist/ApplicationIntegration/APIGateway.png",
+    "aws/eks.png": "https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/main/dist/Containers/ElasticKubernetesService.png",
+    "aws/alb.png": "https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/main/dist/NetworkingContentDelivery/ElasticLoadBalancingApplicationLoadBalancer.png",
+    "aws/sns.png": "https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/main/dist/ApplicationIntegration/SimpleNotificationService.png",
+    "aws/sagemaker.png": "https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/main/dist/ArtificialIntelligence/SageMakerAI.png",
+    "aws/iot_sitewise.png": "https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/main/dist/InternetOfThings/IoTSiteWise.png",
+    "aws/quicksight.png": "https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/main/dist/Analytics/QuickSight.png",
+    "aws/cloudwatch.png": "https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/main/dist/ManagementGovernance/CloudWatch.png",
+    "aws/cloudfront.png": "https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/main/dist/NetworkingContentDelivery/CloudFront.png",
+    "aws/sqs.png": "https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/main/dist/ApplicationIntegration/SimpleQueueService.png",
+
+    "gcp/kubernetes_engine.png": "https://raw.githubusercontent.com/Crashedmind/PlantUML-icons-GCP/master/dist/Compute/Google_Kubernetes_Engine.png",
+    "gcp/compute_engine.png": "https://raw.githubusercontent.com/Crashedmind/PlantUML-icons-GCP/master/dist/Compute/Compute_Engine.png",
+    "gcp/cloud_run.png": "https://raw.githubusercontent.com/Crashedmind/PlantUML-icons-GCP/master/dist/Compute/Cloud_Run.png",
+    "gcp/cloud_storage.png": "https://raw.githubusercontent.com/Crashedmind/PlantUML-icons-GCP/master/dist/Storage/Cloud_Storage.png",
+    "gcp/bigquery.png": "https://raw.githubusercontent.com/Crashedmind/PlantUML-icons-GCP/master/dist/Data_Analytics/BigQuery.png",
+    "gcp/cloud_sql.png": "https://raw.githubusercontent.com/Crashedmind/PlantUML-icons-GCP/master/dist/Databases/Cloud_SQL.png",
+    "gcp/cloud_functions.png": "https://raw.githubusercontent.com/Crashedmind/PlantUML-icons-GCP/master/dist/Compute/Cloud_Functions.png",
+    "gcp/cloud_pubsub.png": "https://raw.githubusercontent.com/Crashedmind/PlantUML-icons-GCP/master/dist/Data_Analytics/Cloud_PubSub.png",
+    "gcp/cloud_load_balancing.png": "https://raw.githubusercontent.com/Crashedmind/PlantUML-icons-GCP/master/dist/Networking/Cloud_Load_Balancing.png",
+    "gcp/cloud_iam.png": "https://raw.githubusercontent.com/Crashedmind/PlantUML-icons-GCP/master/dist/Security/Cloud_IAM.png",
+    "gcp/security_command_center.png": "https://raw.githubusercontent.com/Crashedmind/PlantUML-icons-GCP/master/dist/Security/Cloud_Security_Command_Center.png",
+    "gcp/cloud_logging.png": "https://raw.githubusercontent.com/Crashedmind/PlantUML-icons-GCP/master/dist/Management_Tools/Logging.png",
+    "gcp/cloud_armor.png": "https://raw.githubusercontent.com/Crashedmind/PlantUML-icons-GCP/master/dist/Networking/Cloud_Armor.png",
+    "gcp/cloud_iap.png": "https://raw.githubusercontent.com/Crashedmind/PlantUML-icons-GCP/master/dist/Security/Cloud_IAP.png",
+    "gcp/ai_platform.png": "https://raw.githubusercontent.com/Crashedmind/PlantUML-icons-GCP/master/dist/AI_and_Machine_Learning/AI_Platform.png",
+
+    "kubernetes/pod.svg": "https://raw.githubusercontent.com/kubernetes/community/master/icons/svg/resources/labeled/pod.svg",
+    "kubernetes/deploy.svg": "https://raw.githubusercontent.com/kubernetes/community/master/icons/svg/resources/labeled/deploy.svg",
+    "kubernetes/svc.svg": "https://raw.githubusercontent.com/kubernetes/community/master/icons/svg/resources/labeled/svc.svg",
+    "kubernetes/ing.svg": "https://raw.githubusercontent.com/kubernetes/community/master/icons/svg/resources/labeled/ing.svg",
+    "kubernetes/sts.svg": "https://raw.githubusercontent.com/kubernetes/community/master/icons/svg/resources/labeled/sts.svg",
+    "kubernetes/cm.svg": "https://raw.githubusercontent.com/kubernetes/community/master/icons/svg/resources/labeled/cm.svg"
+  }
+}

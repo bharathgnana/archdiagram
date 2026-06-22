@@ -1,0 +1,82 @@
+{
+  "vendor": "aws",
+  "accent": "#ED7100",
+  "_icons": "AWS ships official icons as a downloadable ZIP (no stable per-file URL). Default icons here come from awslabs/aws-icons-for-plantuml (official-derived PNG). Drop the official AWS SVG pack into the icon cache to override. draw.io 'native' mode uses built-in mxgraph.aws4 stencils for the core services.",
+  "services": {
+    "s3": {
+      "label": "S3",
+      "native": "sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#7AA116;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;",
+      "icon": "aws/s3.png", "w": 48, "h": 48
+    },
+    "lambda": {
+      "label": "Lambda",
+      "native": "sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;",
+      "icon": "aws/lambda.png", "w": 48, "h": 48
+    },
+    "ec2": {
+      "label": "EC2",
+      "native": "sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ec2;",
+      "icon": "aws/ec2.png", "w": 48, "h": 48
+    },
+    "rds": {
+      "label": "RDS",
+      "native": "sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#2E27AD;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.rds;",
+      "icon": "aws/rds.png", "w": 48, "h": 48
+    },
+    "dynamodb": {
+      "label": "DynamoDB",
+      "native": "sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#2E27AD;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.dynamodb;",
+      "icon": "aws/dynamodb.png", "w": 48, "h": 48
+    },
+    "api_gateway": {
+      "label": "API Gateway",
+      "native": "sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.api_gateway;",
+      "icon": "aws/api_gateway.png", "w": 48, "h": 48
+    },
+    "eks": {
+      "label": "EKS",
+      "native": "sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.elastic_kubernetes_service;",
+      "icon": "aws/eks.png", "w": 48, "h": 48
+    },
+    "alb": {
+      "label": "Application Load Balancer",
+      "native": "",
+      "icon": "aws/alb.png", "w": 48, "h": 48
+    },
+    "sns": {
+      "label": "SNS",
+      "native": "sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.sns;",
+      "icon": "aws/sns.png", "w": 48, "h": 48
+    },
+    "sagemaker": {
+      "label": "SageMaker AI",
+      "native": "",
+      "icon": "aws/sagemaker.png", "w": 48, "h": 48
+    },
+    "iot_sitewise": {
+      "label": "IoT SiteWise",
+      "native": "",
+      "icon": "aws/iot_sitewise.png", "w": 48, "h": 48
+    },
+    "quicksight": {
+      "label": "QuickSight",
+      "native": "",
+      "icon": "aws/quicksight.png", "w": 48, "h": 48
+    },
+    "cloudwatch": {
+      "label": "CloudWatch",
+      "native": "",
+      "icon": "aws/cloudwatch.png", "w": 48, "h": 48
+    },
+    "cloudfront": {
+      "label": "CloudFront",
+      "native": "sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudfront;",
+      "icon": "aws/cloudfront.png", "w": 48, "h": 48
+    },
+    "sqs": {
+      "label": "SQS",
+      "native": "sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.sqs;",
+      "icon": "aws/sqs.png", "w": 48, "h": 48
+    }
+  }
+}

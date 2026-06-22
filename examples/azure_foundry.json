@@ -1,0 +1,40 @@
+{
+  "title": "Baseline Azure AI Foundry",
+  "direction": "LR",
+  "groups": [
+    { "id": "edge", "label": "Edge / ingress", "vendor": "azure" },
+    { "id": "app", "label": "Application tier", "vendor": "azure" },
+    { "id": "ai", "label": "AI services", "vendor": "azure" },
+    { "id": "ops", "label": "Identity & monitoring", "vendor": "azure" }
+  ],
+  "nodes": [
+    { "id": "agw", "service": "azure.application_gateway", "label": "App Gateway + WAF", "group": "edge" },
+    { "id": "fw", "service": "azure.firewall", "label": "Azure Firewall", "group": "edge" },
+    { "id": "bastion", "service": "azure.bastion", "label": "Bastion", "group": "edge" },
+    { "id": "app", "service": "azure.app_service", "label": "App Service", "group": "app" },
+    { "id": "kv", "service": "azure.key_vault", "label": "Key Vault", "group": "app" },
+    { "id": "storage", "service": "azure.storage_account", "label": "Storage", "group": "app" },
+    { "id": "foundry", "service": "azure.ai_foundry", "label": "AI Foundry", "group": "ai" },
+    { "id": "openai", "service": "azure.openai", "label": "Azure OpenAI", "group": "ai" },
+    { "id": "search", "service": "azure.ai_search", "label": "AI Search", "group": "ai" },
+    { "id": "cosmos", "service": "azure.cosmos_db", "label": "Cosmos DB", "group": "ai" },
+    { "id": "entra", "service": "azure.entra_id", "label": "Entra ID", "group": "ops" },
+    { "id": "mi", "service": "azure.managed_identity", "label": "Managed Identity", "group": "ops" },
+    { "id": "monitor", "service": "azure.monitor", "label": "Azure Monitor", "group": "ops" },
+    { "id": "appins", "service": "azure.application_insights", "label": "App Insights", "group": "ops" }
+  ],
+  "edges": [
+    { "source": "agw", "target": "app", "label": "https" },
+    { "source": "fw", "target": "app", "label": "egress" },
+    { "source": "app", "target": "foundry", "label": "inference" },
+    { "source": "foundry", "target": "openai" },
+    { "source": "foundry", "target": "search", "label": "RAG" },
+    { "source": "foundry", "target": "cosmos", "label": "state" },
+    { "source": "app", "target": "kv", "label": "secrets" },
+    { "source": "app", "target": "storage" },
+    { "source": "app", "target": "mi" },
+    { "source": "mi", "target": "entra" },
+    { "source": "app", "target": "appins" },
+    { "source": "appins", "target": "monitor" }
+  ]
+}

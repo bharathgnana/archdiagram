@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# Node
+node_modules/
+package-lock.json
+
+# Vendor icons are NOT committed (fetched by tools/download_icons.py)
+icons/
+*.icon-cache/
+
+# Generated diagram outputs
+out/
+*.drawio
+*.vsdx
+*.pdf
+!examples/**/*.drawio
+
+# OS / editor
+.DS_Store
+Thumbs.db

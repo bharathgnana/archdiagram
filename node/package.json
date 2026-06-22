@@ -1,0 +1,19 @@
+{
+  "name": "archdiagram-node-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Optional Node helpers for archdiagram: rasterise SVG icons to PNG (resvg) and convert page SVG to PDF (pdfkit + svg-to-pdfkit).",
+  "type": "module",
+  "bin": {
+    "archdiagram-rasterize": "rasterize.mjs",
+    "archdiagram-svg2pdf": "svg2pdf.mjs"
+  },
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "pdfkit": "^0.15.0",
+    "svg-to-pdfkit": "^0.1.8"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

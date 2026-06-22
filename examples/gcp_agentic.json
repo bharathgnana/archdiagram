@@ -1,0 +1,31 @@
+{
+  "title": "Multi-tenant agentic AI on Google Cloud",
+  "direction": "LR",
+  "groups": [
+    { "id": "routing", "label": "Routing hub", "vendor": "gcp" },
+    { "id": "governance", "label": "Governance & security hub", "vendor": "gcp" },
+    { "id": "tenant_a", "label": "Tenant A", "vendor": "gcp" }
+  ],
+  "nodes": [
+    { "id": "armor", "service": "gcp.cloud_armor", "label": "Cloud Armor", "group": "routing" },
+    { "id": "lb", "service": "gcp.load_balancing", "label": "Load Balancing", "group": "routing" },
+    { "id": "run", "service": "gcp.cloud_run", "label": "Cloud Run portal", "group": "routing" },
+    { "id": "scc", "service": "gcp.security_command_center", "label": "Security Cmd Center", "group": "governance" },
+    { "id": "iam", "service": "gcp.iam", "label": "Central IAM", "group": "governance" },
+    { "id": "logging", "service": "gcp.cloud_logging", "label": "Cloud Logging", "group": "governance" },
+    { "id": "agent", "service": "gcp.vertex_ai", "label": "Agent Runtime", "group": "tenant_a" },
+    { "id": "gemini", "service": "gcp.gemini", "label": "Gemini", "group": "tenant_a" },
+    { "id": "modelarmor", "service": "gcp.model_armor", "label": "Model Armor", "group": "tenant_a" },
+    { "id": "datastore", "service": "gcp.bigquery", "label": "Datastore (BigQuery)", "group": "tenant_a" }
+  ],
+  "edges": [
+    { "source": "armor", "target": "lb" },
+    { "source": "lb", "target": "run" },
+    { "source": "run", "target": "agent", "label": "route" },
+    { "source": "agent", "target": "modelarmor", "label": "sanitize" },
+    { "source": "agent", "target": "gemini", "label": "generate" },
+    { "source": "agent", "target": "datastore", "label": "RAG" },
+    { "source": "run", "target": "scc" },
+    { "source": "scc", "target": "logging" }
+  ]
+}

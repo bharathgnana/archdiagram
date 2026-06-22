@@ -1,0 +1,82 @@
+{
+  "vendor": "gcp",
+  "accent": "#4285F4",
+  "_icons": "Google ships official icons as a downloadable ZIP (no stable per-file URL). Default icons here come from Crashedmind/PlantUML-icons-GCP (official-derived PNG). Newer AI services (Vertex AI Agent Engine, Gemini, Model Armor) are not in that pack and fall back to labelled boxes. Drop the official GCP SVG pack into the icon cache to override.",
+  "services": {
+    "gke": {
+      "label": "Kubernetes Engine",
+      "native": "sketch=0;html=1;aspect=fixed;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontSize=12;shape=mxgraph.gcp2.kubernetes_engine;",
+      "icon": "gcp/kubernetes_engine.png", "w": 48, "h": 48
+    },
+    "compute_engine": {
+      "label": "Compute Engine",
+      "native": "",
+      "icon": "gcp/compute_engine.png", "w": 48, "h": 48
+    },
+    "cloud_run": {
+      "label": "Cloud Run",
+      "native": "",
+      "icon": "gcp/cloud_run.png", "w": 48, "h": 48
+    },
+    "cloud_storage": {
+      "label": "Cloud Storage",
+      "native": "",
+      "icon": "gcp/cloud_storage.png", "w": 48, "h": 48
+    },
+    "bigquery": {
+      "label": "BigQuery",
+      "native": "",
+      "icon": "gcp/bigquery.png", "w": 48, "h": 48
+    },
+    "cloud_sql": {
+      "label": "Cloud SQL",
+      "native": "",
+      "icon": "gcp/cloud_sql.png", "w": 48, "h": 48
+    },
+    "cloud_functions": {
+      "label": "Cloud Functions",
+      "native": "",
+      "icon": "gcp/cloud_functions.png", "w": 48, "h": 48
+    },
+    "pubsub": {
+      "label": "Pub/Sub",
+      "native": "",
+      "icon": "gcp/cloud_pubsub.png", "w": 48, "h": 48
+    },
+    "load_balancing": {
+      "label": "Cloud Load Balancing",
+      "native": "",
+      "icon": "gcp/cloud_load_balancing.png", "w": 48, "h": 48
+    },
+    "iam": {
+      "label": "Cloud IAM",
+      "native": "",
+      "icon": "gcp/cloud_iam.png", "w": 48, "h": 48
+    },
+    "security_command_center": {
+      "label": "Security Command Center",
+      "native": "",
+      "icon": "gcp/security_command_center.png", "w": 48, "h": 48
+    },
+    "cloud_logging": {
+      "label": "Cloud Logging",
+      "native": "",
+      "icon": "gcp/cloud_logging.png", "w": 48, "h": 48
+    },
+    "cloud_armor": {
+      "label": "Cloud Armor",
+      "native": "",
+      "icon": "gcp/cloud_armor.png", "w": 48, "h": 48
+    },
+    "iap": {
+      "label": "Identity-Aware Proxy",
+      "native": "",
+      "icon": "gcp/cloud_iap.png", "w": 48, "h": 48
+    },
+    "vertex_ai": {
+      "label": "Vertex AI",
+      "native": "",
+      "icon": "gcp/ai_platform.png", "w": 48, "h": 48
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "_comment": "Sample MCP client config. Point your agent (Cursor: .cursor/mcp.json, Claude Desktop: claude_desktop_config.json) at the archdiagram MCP server. Adjust the cwd to your clone path. Requires: pip install \"archdiagram[mcp]\".",
+  "mcpServers": {
+    "archdiagram": {
+      "command": "python",
+      "args": ["-m", "mcp_server.server"],
+      "cwd": "/absolute/path/to/archdiagram"
+    }
+  }
+}

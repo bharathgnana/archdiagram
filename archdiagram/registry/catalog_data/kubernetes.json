@@ -1,0 +1,48 @@
+{
+  "vendor": "kubernetes",
+  "accent": "#326CE5",
+  "services": {
+    "pod": {
+      "label": "Pod",
+      "native": "sketch=0;html=1;aspect=fixed;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontSize=12;shape=mxgraph.kubernetes.pod;",
+      "icon": "kubernetes/pod.svg",
+      "w": 48,
+      "h": 48
+    },
+    "deployment": {
+      "label": "Deployment",
+      "native": "sketch=0;html=1;aspect=fixed;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontSize=12;shape=mxgraph.kubernetes.deploy;",
+      "icon": "kubernetes/deploy.svg",
+      "w": 48,
+      "h": 48
+    },
+    "service": {
+      "label": "Service",
+      "native": "sketch=0;html=1;aspect=fixed;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontSize=12;shape=mxgraph.kubernetes.svc;",
+      "icon": "kubernetes/svc.svg",
+      "w": 48,
+      "h": 48
+    },
+    "ingress": {
+      "label": "Ingress",
+      "native": "sketch=0;html=1;aspect=fixed;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontSize=12;shape=mxgraph.kubernetes.ing;",
+      "icon": "kubernetes/ing.svg",
+      "w": 48,
+      "h": 48
+    },
+    "statefulset": {
+      "label": "StatefulSet",
+      "native": "sketch=0;html=1;aspect=fixed;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontSize=12;shape=mxgraph.kubernetes.sts;",
+      "icon": "kubernetes/sts.svg",
+      "w": 48,
+      "h": 48
+    },
+    "configmap": {
+      "label": "ConfigMap",
+      "native": "sketch=0;html=1;aspect=fixed;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontSize=12;shape=mxgraph.kubernetes.cm;",
+      "icon": "kubernetes/cm.svg",
+      "w": 48,
+      "h": 48
+    }
+  }
+}
