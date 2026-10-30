@@ -63,7 +63,7 @@ jobs:
       - name: Build the deployable image
         run: docker build --tag archdiagram-mcp:test .
       - name: Start the Streamable HTTP MCP server
-        run: docker run --detach --rm --name archdiagram-mcp-test -e ARCHDIAGRAM_ACCESS_MODE=disabled -p 8080:8080 archdiagram-mcp:test
+        run: docker run --detach --rm --name archdiagram-mcp-test -e PORT=8080 -e ARCHDIAGRAM_ACCESS_MODE=disabled -p 8080:8080 archdiagram-mcp:test
       - name: Confirm the MCP endpoint accepts connections
         run: |
           for _ in {1..20}; do

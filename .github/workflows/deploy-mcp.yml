@@ -65,4 +65,5 @@ jobs:
 
       - name: Report MCP endpoint
         working-directory: infra/terraform
-        run: echo "MCP endpoint: $(terraform output -raw mcp_endpoint)"
+        run: |
+          echo "MCP endpoint: $(terraform output -raw mcp_endpoint)"

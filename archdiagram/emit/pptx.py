@@ -107,6 +107,7 @@ def _polyline(sid: int, points: list[tuple[float, float]], *, directed: bool,
         commands.append(f'<a:{tag}><a:pt x="{_n(x-left)}" y="{_n(y-top)}"/></a:{tag}>')
     dash = '<a:prstDash val="dash"/>' if dashed else ''
     arrow = '<a:tailEnd type="triangle"/>' if directed else ''
+    path_commands = ''.join(commands)
     return (
         '<p:sp><p:nvSpPr>'
         f'<p:cNvPr id="{sid}" name="Routed edge {sid}"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>'
@@ -114,7 +115,7 @@ def _polyline(sid: int, points: list[tuple[float, float]], *, directed: bool,
         f'<a:ext cx="{width}" cy="{height}"/></a:xfrm>'
         '<a:custGeom><a:avLst/><a:gdLst/><a:ahLst/><a:cxnLst/>'
         '<a:rect l="l" t="t" r="r" b="b"/><a:pathLst>'
-        f'<a:path w="{width}" h="{height}" fill="none">{''.join(commands)}</a:path>'
+        f'<a:path w="{width}" h="{height}" fill="none">{path_commands}</a:path>'
         '</a:pathLst></a:custGeom><a:noFill/>'
         f'<a:ln w="19050"><a:solidFill><a:srgbClr val="{color}"/></a:solidFill>'
         f'{dash}{arrow}</a:ln></p:spPr></p:sp>'
