@@ -25,6 +25,7 @@ out/
 *.pptx
 *.svg
 *.html
+!mcp_server/web_assets/index.html
 !examples/**/*.drawio
 !examples/**/*.svg
 !tests/golden/*.drawio

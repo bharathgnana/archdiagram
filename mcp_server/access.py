@@ -192,13 +192,14 @@ class FirestoreQuotaStore:
 class ApiKeyGate:
     """Raw ASGI middleware safe for streamable HTTP and SSE responses."""
 
-    def __init__(self, app: Callable[..., Awaitable[None]], store: FirestoreQuotaStore, pepper: str) -> None:
+    def __init__(self, app: Callable[..., Awaitable[None]], store: FirestoreQuotaStore, pepper: str, paths: tuple[str, ...] = ("/mcp",)) -> None:
         self.app = app
         self.store = store
         self.pepper = pepper
+        self.paths = paths
 
     async def __call__(self, scope: dict[str, Any], receive: Any, send: Any) -> None:
-        if scope["type"] != "http" or scope.get("path") != "/mcp" or scope.get("method") == "OPTIONS":
+        if scope["type"] != "http" or scope.get("path") not in self.paths or scope.get("method") == "OPTIONS":
             await self.app(scope, receive, send)
             return
         try:

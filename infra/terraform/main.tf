@@ -138,10 +138,11 @@ resource "google_service_account_iam_member" "github_actions_impersonates_deploy
 }
 
 resource "google_cloud_run_v2_service" "mcp" {
-  count    = var.container_image == null ? 0 : 1
-  name     = var.service_name
-  location = var.region
-  ingress  = "INGRESS_TRAFFIC_ALL"
+  count                = var.container_image == null ? 0 : 1
+  name                 = var.service_name
+  location             = var.region
+  ingress              = "INGRESS_TRAFFIC_ALL"
+  invoker_iam_disabled = true
 
   template {
     service_account                  = google_service_account.runtime.email
@@ -163,6 +164,16 @@ resource "google_cloud_run_v2_service" "mcp" {
       env {
         name  = "GOOGLE_CLOUD_PROJECT"
         value = var.project_id
+      }
+
+      env {
+        name  = "ARCHDIAGRAM_FIREBASE_API_KEY"
+        value = var.firebase_web_api_key
+      }
+
+      env {
+        name  = "ARCHDIAGRAM_AUTH_DOMAIN"
+        value = var.firebase_auth_domain
       }
 
       env {
@@ -192,13 +203,4 @@ resource "google_cloud_run_v2_service" "mcp" {
       }
     }
   }
-}
-
-resource "google_cloud_run_v2_service_iam_member" "public_invoker" {
-  count    = var.container_image == null ? 0 : 1
-  project  = var.project_id
-  location = var.region
-  name     = google_cloud_run_v2_service.mcp[0].name
-  role     = "roles/run.invoker"
-  member   = "allUsers"
 }

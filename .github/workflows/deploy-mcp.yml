@@ -59,6 +59,8 @@ jobs:
           TF_VAR_artifact_repository: ${{ vars.GCP_ARTIFACT_REPOSITORY }}
           TF_VAR_service_name: ${{ vars.GCP_CLOUD_RUN_SERVICE }}
           TF_VAR_container_image: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REPOSITORY }}/archdiagram-mcp:${{ github.sha }}
+          TF_VAR_firebase_web_api_key: ${{ vars.FIREBASE_WEB_API_KEY }}
+          TF_VAR_firebase_auth_domain: ${{ vars.FIREBASE_AUTH_DOMAIN }}
         run: |
           terraform init -input=false -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" -backend-config="prefix=archdiagram-mcp"
           terraform apply -input=false -auto-approve

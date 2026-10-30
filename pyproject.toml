@@ -38,3 +38,4 @@ packages = [
 [tool.setuptools.package-data]
 "archdiagram.registry" = ["catalog_data/*.json"]
 "archdiagram.emit" = ["pptx_parts/*.xml"]
+"mcp_server" = ["web_assets/*"]

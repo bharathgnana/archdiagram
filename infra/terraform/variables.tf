@@ -45,3 +45,15 @@ variable "api_key_pepper_secret_id" {
   default     = "archdiagram-api-key-pepper"
   description = "Secret Manager secret containing the HMAC pepper for buyer API keys."
 }
+
+variable "firebase_web_api_key" {
+  type        = string
+  default     = ""
+  description = "Public Firebase web API key for browser email sign-in."
+}
+
+variable "firebase_auth_domain" {
+  type        = string
+  default     = ""
+  description = "Identity Platform/Firebase auth domain for browser email sign-in."
+}

@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 
 from .access import ApiKeyGate, hosted_access_settings
+from .web import BrowserApp
 
 from .tools import (
     catalog_resource,
@@ -60,13 +61,13 @@ mcp.prompt()(describe_architecture)
 def hosted_app():
     """Return the Cloud Run ASGI app protected by buyer-specific API keys."""
     if os.environ.get("ARCHDIAGRAM_ACCESS_MODE", "api-key") == "disabled":
-        return mcp.streamable_http_app()
+        return BrowserApp(mcp.streamable_http_app())
     if os.environ.get("ARCHDIAGRAM_ACCESS_MODE", "api-key") != "api-key":
         raise RuntimeError("ARCHDIAGRAM_ACCESS_MODE must be 'disabled' or 'api-key'")
     store, pepper = hosted_access_settings()
     if not pepper:
         raise RuntimeError("ARCHDIAGRAM_API_KEY_PEPPER must be configured for hosted access")
-    return ApiKeyGate(mcp.streamable_http_app(), store, pepper)
+    return BrowserApp(ApiKeyGate(mcp.streamable_http_app(), store, pepper), store, pepper)
 
 
 def main() -> None:
