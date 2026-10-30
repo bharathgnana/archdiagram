@@ -15,9 +15,9 @@ rasteriser is missing, the PDF is still produced with labelled fallback boxes.
 
 from __future__ import annotations
 
-from ..layout.engine import layout_diagram
+from ..layout.engine import LayoutResult, layout_diagram
 from ..rasterize.resvg import NodeBridgeError, pdf_bridge_available, svg_to_pdf
-from ..registry.catalog import catalog_for
+from ..registry.catalog import Catalog, catalog_for
 from ..registry.icons import IconResolver
 from ..spec.model import Diagram
 from .iconglyph import node_icon_pngs
@@ -34,6 +34,8 @@ def emit_pdf(
     *,
     icon_cache: str | None = None,
     raster_scale: float = 2.0,
+    layout: LayoutResult | None = None,
+    catalog: Catalog | None = None,
 ) -> list[str]:
     """Render ``diagram`` to a PDF file. Returns a list of non-fatal warnings."""
 
@@ -44,13 +46,14 @@ def emit_pdf(
             "Then retry. (Node 18+ required.)"
         )
 
-    layout = layout_diagram(diagram)
+    layout = layout if layout is not None else layout_diagram(diagram)
+    catalog = catalog if catalog is not None else catalog_for(diagram)
     resolver = IconResolver(icon_cache)
     try:
-        node_pngs, warnings = node_icon_pngs(diagram, resolver, raster_scale)
+        node_pngs, warnings = node_icon_pngs(diagram, resolver, raster_scale, catalog=catalog)
     except NodeBridgeError:
         node_pngs, warnings = {}, ["rasteriser failed -> all nodes use fallback boxes"]
 
-    svg = build_page_svg(diagram, layout, catalog_for(diagram), node_pngs)
+    svg = build_page_svg(diagram, layout, catalog, node_pngs)
     svg_to_pdf(svg, out_path, width=layout.width, height=layout.height + 36, title=diagram.title)
     return warnings

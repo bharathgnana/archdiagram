@@ -4,15 +4,17 @@ from __future__ import annotations
 
 import html
 
-from ..layout.engine import layout_diagram
-from ..registry.catalog import catalog_for
+from ..layout.engine import LayoutResult, layout_diagram
+from ..registry.catalog import Catalog, catalog_for
 from ..registry.icons import IconResolver
 from ..spec.model import Diagram
 from .svgcanvas import build_page_svg
 
 
-def render_svg(diagram: Diagram, *, icon_cache: str | None = None) -> tuple[str, list[str]]:
-    catalog = catalog_for(diagram)
+def render_svg(diagram: Diagram, *, icon_cache: str | None = None,
+               layout: LayoutResult | None = None,
+               catalog: Catalog | None = None) -> tuple[str, list[str]]:
+    catalog = catalog if catalog is not None else catalog_for(diagram)
     resolver = IconResolver(icon_cache)
     uris: dict[str, str] = {}
     warnings: list[str] = []
@@ -28,11 +30,14 @@ def render_svg(diagram: Diagram, *, icon_cache: str | None = None) -> tuple[str,
             warnings.append(f"missing icon '{entry.icon}' (node '{node.id}') -> fallback box")
         else:
             uris[node.id] = uri
-    return build_page_svg(diagram, layout_diagram(diagram), catalog, icon_uris=uris), warnings
+    return build_page_svg(diagram, layout if layout is not None else layout_diagram(diagram),
+                          catalog, icon_uris=uris), warnings
 
 
-def render_html(diagram: Diagram, *, icon_cache: str | None = None) -> tuple[str, list[str]]:
-    svg, warnings = render_svg(diagram, icon_cache=icon_cache)
+def render_html(diagram: Diagram, *, icon_cache: str | None = None,
+                layout: LayoutResult | None = None,
+                catalog: Catalog | None = None) -> tuple[str, list[str]]:
+    svg, warnings = render_svg(diagram, icon_cache=icon_cache, layout=layout, catalog=catalog)
     title = html.escape(diagram.title)
     return (
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'

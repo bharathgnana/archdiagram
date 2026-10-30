@@ -9,8 +9,8 @@ import re
 import zipfile
 from pathlib import Path
 
-from ..layout.engine import ICON_SIZE, lane_bands, layout_diagram
-from ..registry.catalog import catalog_for
+from ..layout.engine import ICON_SIZE, LayoutResult, lane_bands, layout_diagram
+from ..registry.catalog import Catalog, catalog_for
 from ..registry.icons import IconResolver
 from ..spec.model import Diagram
 from ..shapes import SHAPES
@@ -190,12 +190,14 @@ def _theme() -> str:
     )
 
 
-def emit_pptx(diagram: Diagram, out_path: str, *, icon_cache: str | None = None) -> list[str]:
+def emit_pptx(diagram: Diagram, out_path: str, *, icon_cache: str | None = None,
+              layout: LayoutResult | None = None,
+              catalog: Catalog | None = None) -> list[str]:
     """Write a PPTX. Shapes and text remain editable; vendor icons are embedded PNGs."""
-    layout = layout_diagram(diagram)
+    layout = layout if layout is not None else layout_diagram(diagram)
     modern = is_modern_diagram(diagram)
-    catalog = catalog_for(diagram)
-    images, warnings = node_icon_pngs(diagram, IconResolver(icon_cache))
+    catalog = catalog if catalog is not None else catalog_for(diagram)
+    images, warnings = node_icon_pngs(diagram, IconResolver(icon_cache), catalog=catalog)
     shapes: list[str] = []
     slide_rels = [("rId1", f"{R}/slideLayout", "../slideLayouts/slideLayout1.xml")]
     media: dict[str, bytes] = {}

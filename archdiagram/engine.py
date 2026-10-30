@@ -65,9 +65,10 @@ def render(source: Any, fmt: str, *, icon_cache: str | None = None,
     diagram = source if isinstance(source, Diagram) else load_spec(source)
     diagram, normalization_warnings = normalize_edges(diagram)
     diagram, resolution_warnings = resolve_services(diagram, strict=strict)
+    catalog = catalog_for(diagram)
     layout = layout_diagram(diagram)
     output_format = get_format(fmt)
-    content, warnings = output_format.renderer(diagram, icon_cache, drawio_mode)
+    content, warnings = output_format.renderer(diagram, layout, catalog, icon_cache, drawio_mode)
     return RenderResult(diagram, output_format, layout, content,
                         tuple(normalization_warnings + resolution_warnings + warnings))
 

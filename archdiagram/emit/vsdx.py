@@ -16,8 +16,8 @@ import os
 import math
 import zipfile
 
-from ..layout.engine import ICON_SIZE, lane_bands, layout_diagram
-from ..registry.catalog import catalog_for
+from ..layout.engine import ICON_SIZE, LayoutResult, lane_bands, layout_diagram
+from ..registry.catalog import Catalog, catalog_for
 from ..registry.icons import IconResolver
 from ..spec.model import Diagram
 from ..shapes import SHAPES
@@ -325,14 +325,16 @@ def emit_vsdx(
     *,
     icon_cache: str | None = None,
     raster_scale: float = 2.0,
+    layout: LayoutResult | None = None,
+    catalog: Catalog | None = None,
 ) -> list[str]:
     """Write ``diagram`` to a .vsdx file. Returns non-fatal warnings."""
 
-    layout = layout_diagram(diagram)
+    layout = layout if layout is not None else layout_diagram(diagram)
     modern = is_modern_diagram(diagram)
-    catalog = catalog_for(diagram)
+    catalog = catalog if catalog is not None else catalog_for(diagram)
     resolver = IconResolver(icon_cache)
-    node_pngs, warnings = node_icon_pngs(diagram, resolver, raster_scale)
+    node_pngs, warnings = node_icon_pngs(diagram, resolver, raster_scale, catalog=catalog)
 
     page_h = layout.height
     page_w = layout.width

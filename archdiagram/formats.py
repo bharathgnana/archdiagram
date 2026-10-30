@@ -12,9 +12,11 @@ from .emit.pdf import emit_pdf
 from .emit.pptx import emit_pptx
 from .emit.svg import render_html, render_svg
 from .emit.vsdx import emit_vsdx
+from .layout.engine import LayoutResult
+from .registry.catalog import Catalog
 from .spec.model import Diagram
 
-Renderer = Callable[[Diagram, str | None, str], tuple[bytes, list[str]]]
+Renderer = Callable[[Diagram, LayoutResult, Catalog, str | None, str], tuple[bytes, list[str]]]
 
 
 @dataclass(frozen=True)
@@ -27,26 +29,34 @@ class OutputFormat:
 
 
 def _file_renderer(emitter: Callable, extension: str) -> Renderer:
-    def render(diagram: Diagram, icon_cache: str | None, _drawio_mode: str) -> tuple[bytes, list[str]]:
+    def render(diagram: Diagram, layout: LayoutResult, catalog: Catalog,
+               icon_cache: str | None, _drawio_mode: str) -> tuple[bytes, list[str]]:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / f"diagram.{extension}"
-            warnings = emitter(diagram, str(path), icon_cache=icon_cache)
+            warnings = emitter(diagram, str(path), icon_cache=icon_cache,
+                               layout=layout, catalog=catalog)
             return path.read_bytes(), warnings
     return render
 
 
-def _drawio(diagram: Diagram, icon_cache: str | None, drawio_mode: str) -> tuple[bytes, list[str]]:
+def _drawio(diagram: Diagram, layout: LayoutResult, catalog: Catalog,
+            icon_cache: str | None, drawio_mode: str) -> tuple[bytes, list[str]]:
     mode = {"portable": PORTABLE, "native": NATIVE, "compressed": COMPRESSED}[drawio_mode]
-    return emit_drawio(diagram, mode=mode, icon_cache=icon_cache).encode("utf-8"), []
+    return emit_drawio(diagram, mode=mode, icon_cache=icon_cache,
+                       layout=layout, catalog=catalog).encode("utf-8"), []
 
 
-def _svg(diagram: Diagram, icon_cache: str | None, _drawio_mode: str) -> tuple[bytes, list[str]]:
-    content, warnings = render_svg(diagram, icon_cache=icon_cache)
+def _svg(diagram: Diagram, layout: LayoutResult, catalog: Catalog,
+         icon_cache: str | None, _drawio_mode: str) -> tuple[bytes, list[str]]:
+    content, warnings = render_svg(diagram, icon_cache=icon_cache,
+                                   layout=layout, catalog=catalog)
     return content.encode("utf-8"), warnings
 
 
-def _html(diagram: Diagram, icon_cache: str | None, _drawio_mode: str) -> tuple[bytes, list[str]]:
-    content, warnings = render_html(diagram, icon_cache=icon_cache)
+def _html(diagram: Diagram, layout: LayoutResult, catalog: Catalog,
+          icon_cache: str | None, _drawio_mode: str) -> tuple[bytes, list[str]]:
+    content, warnings = render_html(diagram, icon_cache=icon_cache,
+                                    layout=layout, catalog=catalog)
     return content.encode("utf-8"), warnings
 
 

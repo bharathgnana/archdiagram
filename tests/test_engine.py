@@ -48,6 +48,22 @@ class TestSharedEngine(unittest.TestCase):
         self.assertFalse(result.format.binary)
         self.assertTrue(FORMATS["pptx"].binary)
 
+    def test_emitters_reuse_engine_layout_and_catalog(self):
+        spec = get_template("process_flow")
+        with contextlib.ExitStack() as stack:
+            for module in ("drawio", "svg", "pdf", "pptx", "vsdx"):
+                stack.enter_context(patch(f"archdiagram.emit.{module}.layout_diagram",
+                                          side_effect=AssertionError("layout recomputed")))
+                stack.enter_context(patch(f"archdiagram.emit.{module}.catalog_for",
+                                          side_effect=AssertionError("catalog reloaded")))
+            stack.enter_context(patch("archdiagram.emit.iconglyph.catalog_for",
+                                      side_effect=AssertionError("icon catalog reloaded")))
+            for fmt in FORMATS:
+                if fmt == "pdf" and not pdf_bridge_available():
+                    continue
+                with self.subTest(format=fmt):
+                    self.assertTrue(render(spec, fmt).content)
+
 
 if __name__ == "__main__":
     unittest.main()
