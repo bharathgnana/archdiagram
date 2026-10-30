@@ -16,7 +16,7 @@ from pathlib import Path
 _DEFAULT_SIZE = 48.0
 _LENGTH = re.compile(r"^\s*(\d+(?:\.\d+)?)\s*(?:px|pt)?\s*$", re.I)
 _LEADING_NUMBER = re.compile(r"^\d+[\s_-]*")
-_ICON_PREFIX = re.compile(r"^(?:icon[\s_-]*)?(?:service[\s_-]+)?", re.I)
+_ICON_PREFIX = re.compile(r"^(?:icon[\s_-]+service[\s_-]+|icon[\s_-]+)", re.I)
 _WORDS = re.compile(r"[A-Za-z0-9]+")
 _NOISE = {"icon", "logo", "color", "colour"}
 

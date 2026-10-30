@@ -14,7 +14,7 @@ import json
 import sys
 
 from .emit.pdf import PdfDependencyError
-from .engine import render_to_file
+from .engine import render_to_file, resolve_services
 from .formats import FORMATS, get_format
 from .registry.catalog import get_catalog
 from .spec.validate import SpecError, SpecValidationError, load_spec
@@ -24,6 +24,8 @@ from .templates import get_template, list_templates, suggest_template
 def _cmd_validate(args: argparse.Namespace) -> int:
     try:
         diagram = load_spec(args.spec)
+        if args.strict:
+            resolve_services(diagram, strict=True)
     except SpecValidationError as exc:
         print(str(exc), file=sys.stderr)
         return 1
@@ -46,7 +48,8 @@ def _cmd_render(args: argparse.Namespace) -> int:
     out_path = args.output or _default_out(args.spec, args.format)
     try:
         result = render_to_file(args.spec, args.format, out_path,
-                                icon_cache=args.icons, drawio_mode=args.drawio_mode)
+                                icon_cache=args.icons, drawio_mode=args.drawio_mode,
+                                strict=args.strict)
     except SpecError as exc:
         print(str(exc), file=sys.stderr)
         return 1
@@ -97,6 +100,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_val = sub.add_parser("validate", help="validate a spec file")
     p_val.add_argument("spec", help="path to spec JSON (or JSON string)")
+    p_val.add_argument("--strict", action="store_true", help="reject unresolved services")
     p_val.set_defaults(func=_cmd_validate)
 
     p_ren = sub.add_parser("render", help="render a spec to a diagram file")
@@ -112,6 +116,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="drawio icon strategy (default: portable, best for Lucid import)",
     )
     p_ren.add_argument("--icons", help="icon cache directory override")
+    p_ren.add_argument("--strict", action="store_true", help="reject unresolved services")
     p_ren.set_defaults(func=_cmd_render)
 
     p_cat = sub.add_parser("catalog", help="inspect the vendor service catalog")

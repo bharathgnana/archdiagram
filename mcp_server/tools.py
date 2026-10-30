@@ -5,17 +5,19 @@ from __future__ import annotations
 import os
 
 from archdiagram.emit.pdf import PdfDependencyError
-from archdiagram.engine import render_to_file
+from archdiagram.engine import render_to_file, resolve_services
 from archdiagram.formats import FORMATS
 from archdiagram.registry.catalog import get_catalog
 from archdiagram.spec.validate import SpecError, SpecValidationError, load_spec
 from archdiagram.templates import get_template, list_templates, suggest_template
 
 
-def validate_spec(spec_json: str) -> dict:
+def validate_spec(spec_json: str, strict: bool = False) -> dict:
     """Validate a diagram spec and return all errors or a compact summary."""
     try:
         diagram = load_spec(spec_json)
+        if strict:
+            resolve_services(diagram, strict=True)
     except SpecValidationError as exc:
         return {"ok": False, "errors": exc.errors}
     except SpecError as exc:
@@ -38,6 +40,7 @@ def render_diagram(
     out_path: str,
     drawio_mode: str = "portable",
     icon_cache: str | None = None,
+    strict: bool = False,
 ) -> dict:
     """Render a JSON spec to pdf, drawio, vsdx, svg, html, or pptx."""
     try:
@@ -49,9 +52,10 @@ def render_diagram(
         return {"ok": False, "errors": [f"unknown format '{fmt}'; use {'|'.join(FORMATS)}"]}
     try:
         result = render_to_file(diagram, fmt, out_path,
-                                icon_cache=icon_cache, drawio_mode=drawio_mode)
-    except PdfDependencyError as exc:
-        return {"ok": False, "errors": [str(exc)]}
+                                icon_cache=icon_cache, drawio_mode=drawio_mode,
+                                strict=strict)
+    except (PdfDependencyError, SpecError, ValueError) as exc:
+        return {"ok": False, "errors": getattr(exc, "errors", [str(exc)])}
     return {"ok": True, "path": os.path.abspath(out_path), "warnings": list(result.warnings)}
 
 

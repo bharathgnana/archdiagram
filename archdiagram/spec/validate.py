@@ -85,8 +85,8 @@ def _validate_node(raw: Any, path: str, col: _Collector) -> Node | None:
     if kind == "service":
         if not col.require_type(f"{path}.service", service, (str,), "string"):
             ok = False
-        elif "." not in service or not all(service.split(".", 1)):
-            col.add(f"{path}.service", "must be '<vendor>.<service_key>' (e.g. 'azure.app_service')")
+        elif not service.strip() or service.startswith(".") or service.endswith("."):
+            col.add(f"{path}.service", "must be a service name or '<vendor>.<service_key>'")
             ok = False
     elif service is not None:
         col.add(f"{path}.service", "only service nodes may specify a service")

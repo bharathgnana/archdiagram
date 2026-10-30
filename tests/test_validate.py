@@ -27,9 +27,11 @@ class TestValidate(unittest.TestCase):
         with self.assertRaises(SpecValidationError):
             validate_spec({"nodes": []})
 
-    def test_bad_service_format(self):
+    def test_providerless_service_format(self):
         spec = self._valid()
-        spec["nodes"][0]["service"] = "azure"  # missing key
+        spec["nodes"][0]["service"] = "aks"
+        self.assertEqual(validate_spec(spec).nodes[0].service, "aks")
+        spec["nodes"][0]["service"] = ".azure"
         with self.assertRaises(SpecValidationError) as ctx:
             validate_spec(spec)
         self.assertTrue(any("service" in e for e in ctx.exception.errors))

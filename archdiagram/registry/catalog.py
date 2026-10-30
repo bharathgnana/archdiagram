@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import json
 import os
+import difflib
+import re
 from dataclasses import dataclass
 from functools import lru_cache
 
@@ -57,6 +59,37 @@ class Catalog:
 
     def lookup(self, service: str | None) -> ServiceEntry | None:
         return self._entries.get(service)
+
+    def resolve(self, service: str, *, threshold: float = 0.78) -> tuple[ServiceEntry | None, str, list[str]]:
+        """Resolve ID, alias, providerless name, then a confident fuzzy match."""
+        def norm(value: str) -> str:
+            return re.sub(r"[^a-z0-9]+", "_", value.casefold()).strip("_")
+
+        query = norm(service)
+        exact = next((entry for entry in self._entries.values()
+                      if norm(entry.service) == query), None)
+        if exact:
+            return exact, "canonical", []
+        entries = sorted(self._entries.values(), key=lambda entry: entry.service)
+        alias = next((entry for entry in entries
+                      if query in {norm(name) for name in entry.aliases}), None)
+        if alias:
+            return alias, "alias", []
+        providerless = next((entry for entry in entries
+                             if query in (norm(entry.key), norm(entry.label))), None)
+        if providerless:
+            return providerless, "providerless", []
+        ranked: list[tuple[float, ServiceEntry]] = []
+        for entry in entries:
+            names = (entry.service, entry.key, entry.label, *entry.aliases)
+            score = max(difflib.SequenceMatcher(None, query, norm(name)).ratio()
+                        for name in names)
+            ranked.append((score, entry))
+        ranked.sort(key=lambda pair: (-pair[0], pair[1].service))
+        suggestions = [entry.service for _, entry in ranked[:5]]
+        if ranked and ranked[0][0] >= threshold:
+            return ranked[0][1], "fuzzy", suggestions
+        return None, "miss", suggestions
 
     def accent(self, vendor: str) -> str:
         return self._accents.get(vendor, _DEFAULT_ACCENT)
@@ -105,6 +138,8 @@ def _load_vendor_file(path: str) -> tuple[str, str, dict[str, ServiceEntry]]:
             accent=accent,
             w=int(svc.get("w", 48)),
             h=int(svc.get("h", 48)),
+            category=svc.get("category", ""),
+            aliases=tuple(svc.get("aliases", ())),
         )
         entries[entry.service] = entry
     return vendor, accent, entries
