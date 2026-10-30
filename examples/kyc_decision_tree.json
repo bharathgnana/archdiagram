@@ -1,0 +1,19 @@
+{
+  "title": "KYC decision tree",
+  "direction": "TB",
+  "nodes": [
+    {"id": "start", "shape": "start", "label": "Application"},
+    {"id": "verify", "shape": "decision", "label": "ID verified?"},
+    {"id": "risk", "shape": "decision", "label": "Risk OK?"},
+    {"id": "approve", "shape": "end", "label": "Approve"},
+    {"id": "reject", "shape": "end", "label": "Reject"},
+    {"id": "escalate", "shape": "end", "label": "Escalate"}
+  ],
+  "edges": [
+    {"source": "start", "target": "verify"},
+    {"source": "verify", "target": "risk", "label": "Yes"},
+    {"source": "verify", "target": "reject", "label": "No"},
+    {"source": "risk", "target": "approve", "label": "Approve"},
+    {"source": "risk", "target": "escalate", "label": "Escalate", "dashed": true, "color": "D79B00"}
+  ]
+}

@@ -43,3 +43,12 @@ and 34/34 with one expected PDF skip in stdlib-only Python.
 The reference implementation was not available locally; only user-supplied
 transcripts were available. This repository is MIT-licensed. No reference code
 has been copied.
+
+Phase-ten target-application testing found that PowerPoint rejected the original
+hand-built PPTX scaffold, even for `sample_spec.json`. The generated slide XML
+itself opened when placed into a PowerPoint-created package. The emitter now
+bundles static presentation, master, blank layout, theme, and property XML
+parts from a locally generated blank deck. It still writes the package and
+dynamic slide with the standard library. Only the five PPTX golden snapshots
+changed in this repair; this is a documented byte-level compatibility change
+required to make the format open in PowerPoint.

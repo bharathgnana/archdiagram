@@ -1,0 +1,18 @@
+{
+  "title": "Approval process with revision loop",
+  "direction": "TB",
+  "nodes": [
+    {"id": "start", "shape": "start", "label": "Request received"},
+    {"id": "draft", "shape": "document", "label": "Draft submission"},
+    {"id": "review", "shape": "process", "label": "Review"},
+    {"id": "complete", "shape": "decision", "label": "Complete?"},
+    {"id": "approved", "shape": "end", "label": "Approved"}
+  ],
+  "edges": [
+    {"source": "start", "target": "draft"},
+    {"source": "draft", "target": "review"},
+    {"source": "review", "target": "complete"},
+    {"source": "complete", "target": "draft", "label": "Revise", "dashed": true},
+    {"source": "complete", "target": "approved", "label": "Submit"}
+  ]
+}

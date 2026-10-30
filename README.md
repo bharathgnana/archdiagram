@@ -4,9 +4,10 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 
-Turn an architecture or workflow description into an **editable diagram**. Cloud service nodes use
-official vendor icons (Azure App Service, AKS, Key Vault, S3, GKE, ...). Workflow nodes can be
-processes, decisions, data steps, starts, and ends, with optional swim lanes.
+Turn a JSON spec into an **editable diagram** for four families: architecture,
+process flow, decision flow, and data flow. Architecture nodes can use Azure,
+AWS, GCP, and Kubernetes vendor icons. The other families use editable shapes,
+loops, labelled branches, lineage edges, and optional swim lanes.
 
 A coding agent (Cursor, Claude Code, Codex) translates a natural-language architecture into a small
 JSON **spec**; the deterministic Python core renders that spec to:
@@ -19,6 +20,11 @@ JSON **spec**; the deterministic Python core renders that spec to:
 | `.svg`    | portable vector image | embedded icons | SVG shapes are editable in vector tools |
 | `.html`   | standalone browser view | embedded icons | via embedded SVG |
 | `.pptx`   | PowerPoint handoff | embedded PNG glyphs | shapes and text are editable |
+
+`drawio` has `native`, `portable`, and `compressed` modes. Compressed mode uses
+draw.io's raw-deflate model encoding and portable embedded icons. For Lucidchart,
+prefer PDF when icon fidelity matters; compressed draw.io imports can lose image
+shapes. PDF needs the optional Node helpers. Shape-only PPTX and VSDX need no Node.
 
 > Lucid note: Lucid does not map draw.io's named vendor stencils or its `img/lib/...` icon
 > references, so those render blank on import. `.drawio`/`.vsdx` therefore **embed** icons
@@ -48,11 +54,12 @@ Rendered from the specs in [`examples/`](examples/) - same engine, real vendor i
 ## Quick start
 
 ```bash
-# 1. (optional) fetch vendor icons into the local cache
-python -m tools.download_icons --vendors azure,aws,gcp,kubernetes
+# 1. check the core; add --icons to fetch vendor icons
+python -m tools.bootstrap
+python -m tools.bootstrap --icons
 
 # 2. (optional) install the Node rasterise/pdf bridge
-cd node && npm install && cd ..
+python -m tools.bootstrap --pdf
 
 # 3. render a spec
 python -m archdiagram.cli render examples/sample_spec.json --format pdf    -o out/arch.pdf
@@ -82,7 +89,36 @@ python -m archdiagram.cli render examples/workflow_swimlane.json --format pptx -
 }
 ```
 
-`service` is `"<vendor>.<service_key>"`. Unknown services degrade gracefully to a labelled box.
+`service` accepts a canonical ID, alias, providerless name, or a confident fuzzy
+match. Unknown names render a fallback box with suggestions. Add `--strict` to
+`validate` or `render` to reject unresolved names.
+
+### Four families
+
+| Family | Primary nodes | Typical direction | Example |
+|---|---|---|---|
+| Architecture | `service` vendor icons | `LR` | [`azure_architecture.json`](examples/azure_architecture.json) |
+| Process flow | `start`, `end`, `process`, `decision`, `io`, `document` | `TB` | [`approval_process.json`](examples/approval_process.json), [`trade_settlement_swimlane.json`](examples/trade_settlement_swimlane.json) |
+| Decision flow | decision diamonds and separate end nodes | `TB` | [`kyc_decision_tree.json`](examples/kyc_decision_tree.json) |
+| Data flow | `data_store`, `io`, `process`, `document` | `LR` | [`investment_data_lineage.json`](examples/investment_data_lineage.json) |
+
+### Spec reference
+
+- Top level: `title`, `direction` (`LR`, `RL`, `TB`, `BT`), `nodes`, `edges`,
+  optional `groups`, `lanes`, and `lane_orientation` (`horizontal` or `vertical`).
+- Node: unique string `id`, exactly one of `service` or `shape`, optional `label`,
+  `group`, `lane`, nonnegative integer `tier`, and explicit `x`/`y`. The shape enum
+  is `start`, `end`, `process`, `decision`, `io`, `document`, `data_store`.
+- Edge: `source` and `target` node IDs, optional `label`, `kind` (`flow` or
+  `data`), `directed`, `dashed`, and six digit RGB `color` with optional `#`.
+- Group: `id`, `label`, and optional `vendor`; a node's `group` names it.
+- Lane: ordered `{id,label}` objects; a node's `lane` names one. Nodes without
+  a lane appear in a trailing unassigned band. Explicit `x`/`y` are rejected in
+  modern lane mode so a node cannot leave its band. Groups nested in lanes are
+  outside the supported layout.
+
+For older specs, `kind` remains accepted as a shape alias. Specs without new
+shape or lane fields use the legacy layout and keep the checked in golden bytes.
 
 ### Index a larger local icon pack
 
@@ -104,10 +140,9 @@ nondefault locations, set `ARCHDIAGRAM_CATALOG` to the manifest path and pass
 `--icons <directory>` when rendering (or set `ARCHDIAGRAM_ICONS`). Generated SVGs
 are embedded in draw.io when no native stencil is available.
 
-For workflows, set `nodes[].kind` to `process`, `decision`, `data`, `start`, or `end` and omit
-`service`. The default kind is `service`, so existing specs still work. Add `lanes` and assign
-every node a `lane` id for swim lanes. Set `edges[].kind` to `data` for a dashed data flow;
-the default is `flow`. See [`examples/workflow_swimlane.json`](examples/workflow_swimlane.json).
+For older workflow specs, `nodes[].kind` still selects `process`, `decision`,
+`data`, `start`, or `end`. New specs should use `shape`. `edges[].kind: "data"`
+draws a dashed data transfer.
 
 ```bash
 python -m archdiagram.cli templates list
@@ -118,9 +153,10 @@ python -m archdiagram.cli templates show dataflow
 
 ## Layout
 
-Node positions are computed by a deterministic, hand-rolled layered layout (no graphviz). Cycles
-share a layer. Swim lanes reserve separate bands for their members. Provide explicit `x`/`y` on a
-node to override the computed position.
+Node positions use a deterministic layered layout. New shape specs use an
+iterative cycle tolerant ranker: loop backs stay visible while downstream steps
+remain on later ranks. Swim lanes reserve ordered bands. Explicit `tier`
+overrides rank; `x`/`y` override placement outside modern lane mode.
 
 ## Use from an AI agent
 
@@ -129,14 +165,14 @@ Codex, ...) straight from Git. Pick either path:
 
 ### 1. As a skill
 
-Clone the repo and point your agent at [`skill/SKILL.md`](skill/SKILL.md). It
-teaches the agent the spec schema, catalog lookup, and render commands so it can
-go from a natural-language architecture to rendered files. See also
+Choose the relevant family skill under [`skill/`](skill/). The old
+[`skill/SKILL.md`](skill/SKILL.md) is a compatibility pointer. Each skill has
+spec rules, a worked example, and a render and inspect loop. See also
 [`AGENTS.md`](AGENTS.md).
 
 ```bash
 git clone https://github.com/bharathgnana/archdiagram.git
-cd archdiagram && python -m tools.download_icons
+cd archdiagram && python -m tools.bootstrap
 ```
 
 ### 2. As an MCP server
@@ -146,9 +182,10 @@ pip install "archdiagram[mcp]"
 python -m mcp_server.server          # stdio transport
 ```
 
-Exposes `validate_spec`, `render_diagram`, `search_catalog`, `list_catalog`,
-`choose_template`, and `get_diagram_template`
-tools. A sample client config is in [`examples/mcp.json`](examples/mcp.json)
+Exposes `list_templates`, `list_icons`, `resolve_service`, `get_catalog_info`,
+`validate_spec`, and `generate_diagram`, plus the earlier tool names as aliases.
+The MCP tools use the same engine as the CLI. Details are in
+[`docs/mcp_server.md`](docs/mcp_server.md). A sample client config is in [`examples/mcp.json`](examples/mcp.json)
 (drop it into `.cursor/mcp.json` or `claude_desktop_config.json`).
 
 ## Repository layout

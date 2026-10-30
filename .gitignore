@@ -22,10 +22,17 @@ out/
 *.drawio
 *.vsdx
 *.pdf
+*.pptx
+*.svg
+*.html
 !examples/**/*.drawio
+!examples/**/*.svg
 !tests/golden/*.drawio
 !tests/golden/*.vsdx
 !tests/golden/*.pdf
+!tests/golden/*.pptx
+!tests/golden/*.svg
+!tests/golden/*.html
 
 # OS / editor
 .DS_Store

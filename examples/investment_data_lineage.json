@@ -1,0 +1,19 @@
+{
+  "title": "Investment data lineage",
+  "direction": "LR",
+  "nodes": [
+    {"id": "trade_feed", "shape": "io", "label": "Trade feed"},
+    {"id": "prices", "shape": "data_store", "label": "Market prices"},
+    {"id": "normalize", "shape": "process", "label": "Normalize"},
+    {"id": "warehouse", "shape": "data_store", "label": "Position warehouse"},
+    {"id": "risk", "shape": "process", "label": "Calculate risk"},
+    {"id": "report", "shape": "document", "label": "Risk report"}
+  ],
+  "edges": [
+    {"source": "trade_feed", "target": "normalize", "kind": "data", "label": "trades"},
+    {"source": "prices", "target": "normalize", "kind": "data", "label": "marks"},
+    {"source": "normalize", "target": "warehouse", "kind": "data", "label": "positions"},
+    {"source": "warehouse", "target": "risk", "kind": "data", "label": "holdings"},
+    {"source": "risk", "target": "report", "kind": "data", "label": "metrics"}
+  ]
+}

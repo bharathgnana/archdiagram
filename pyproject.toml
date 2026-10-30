@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "archdiagram"
-version = "0.1.0"
-description = "Turn cloud architecture and workflow specs into editable diagrams with vendor icons, swim lanes, and multiple exports."
+version = "0.2.0"
+description = "Render architecture, process, decision, and data flow specs as editable diagrams."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 authors = [{ name = "Bharath Adapa" }]
-keywords = ["architecture", "workflow", "swimlane", "diagram", "drawio", "vsdx", "pdf", "svg", "pptx", "aws", "azure", "gcp", "kubernetes", "lucidchart"]
+keywords = ["architecture", "process", "decision", "dataflow", "workflow", "swimlane", "diagram", "drawio", "vsdx", "pdf", "svg", "pptx", "aws", "azure", "gcp", "kubernetes", "lucidchart"]
 
 # Core has ZERO third-party Python dependencies (stdlib only).
 dependencies = []
@@ -37,3 +37,4 @@ packages = [
 
 [tool.setuptools.package-data]
 "archdiagram.registry" = ["catalog_data/*.json"]
+"archdiagram.emit" = ["pptx_parts/*.xml"]

@@ -1,0 +1,22 @@
+{
+  "title": "Trade settlement handoffs",
+  "lane_orientation": "horizontal",
+  "lanes": [
+    {"id": "trading", "label": "Trading"},
+    {"id": "operations", "label": "Operations"},
+    {"id": "custodian", "label": "Custodian"}
+  ],
+  "nodes": [
+    {"id": "capture", "shape": "start", "label": "Trade captured", "lane": "trading"},
+    {"id": "confirm", "shape": "process", "label": "Confirm trade", "lane": "operations"},
+    {"id": "instruction", "shape": "document", "label": "Settlement instruction", "lane": "operations"},
+    {"id": "settle", "shape": "process", "label": "Settle", "lane": "custodian"},
+    {"id": "done", "shape": "end", "label": "Booked", "lane": "trading"}
+  ],
+  "edges": [
+    {"source": "capture", "target": "confirm"},
+    {"source": "confirm", "target": "instruction"},
+    {"source": "instruction", "target": "settle"},
+    {"source": "settle", "target": "done"}
+  ]
+}

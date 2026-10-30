@@ -1,0 +1,16 @@
+{
+  "title": "Azure hosting architecture",
+  "direction": "LR",
+  "groups": [{"id": "platform", "label": "Platform", "vendor": "azure"}],
+  "nodes": [
+    {"id": "front", "service": "azure.app_service", "label": "Web app", "group": "platform"},
+    {"id": "compute", "service": "azure.aks", "label": "Kubernetes", "group": "platform"},
+    {"id": "secrets", "service": "azure.key_vault", "label": "Key Vault"},
+    {"id": "storage", "service": "azure.storage_account", "label": "Storage"}
+  ],
+  "edges": [
+    {"source": "front", "target": "compute", "label": "API"},
+    {"source": "compute", "target": "secrets", "label": "secrets"},
+    {"source": "compute", "target": "storage", "kind": "data", "label": "files"}
+  ]
+}

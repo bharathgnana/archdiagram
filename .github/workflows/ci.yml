@@ -2,24 +2,55 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, "feature/**"]
   pull_request:
-    branches: [main]
+  workflow_dispatch:
 
 jobs:
-  test:
-    name: test
+  stdlib:
+    name: stdlib (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install core
+        run: python -m pip install -e .
+      - name: Run full suite including skill sync and family examples
+        run: python -m unittest discover -s tests -v
+
+  optional-node:
+    name: PDF and icon deck (Node 20)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
-      - name: Install (editable, stdlib-only core)
-        run: python -m pip install -e .
-
-      - name: Run unittest suite
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install core and optional Node helpers
+        run: |
+          python -m pip install -e .
+          npm ci --prefix node
+      - name: Run full suite with PDF golden and family formats
         run: python -m unittest discover -s tests -v
+
+  optional-mcp:
+    name: MCP SDK 1.x
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install MCP extra
+        run: python -m pip install -e ".[mcp]"
+      - name: Test SDK tool registration
+        run: python -m unittest discover -s tests -p test_mcp_platform.py -v

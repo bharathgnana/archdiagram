@@ -5,7 +5,9 @@ from __future__ import annotations
 import html
 import math
 import os
+import re
 import zipfile
+from pathlib import Path
 
 from ..layout.engine import ICON_SIZE, lane_bands, layout_diagram
 from ..registry.catalog import catalog_for
@@ -38,10 +40,11 @@ def _color(value: str) -> str:
 
 
 def _text(text: str, size: int = 1200, color: str = "1B1F24", *,
-          font_scale: int | None = None) -> str:
+          font_scale: int | None = None, tight: bool = False) -> str:
     autofit = f'<a:normAutofit fontScale="{font_scale}"/>' if font_scale else ''
-    body_pr = (f'<a:bodyPr wrap="square" anchor="ctr">{autofit}</a:bodyPr>'
-               if font_scale else '<a:bodyPr wrap="square" anchor="ctr"/>')
+    margins = ' lIns="0" rIns="0" tIns="0" bIns="0"' if tight else ''
+    body_pr = (f'<a:bodyPr wrap="square" anchor="ctr"{margins}>{autofit}</a:bodyPr>'
+               if font_scale else f'<a:bodyPr wrap="square" anchor="ctr"{margins}/>')
     return (
         f'<p:txBody>{body_pr}<a:lstStyle/>'
         '<a:p><a:pPr algn="ctr"/><a:r>'
@@ -52,7 +55,7 @@ def _text(text: str, size: int = 1200, color: str = "1B1F24", *,
 
 def _fit_text(label: str, w: float, h: float, geom: str) -> tuple[int, int | None]:
     """Choose readable type and a final Office shrink factor for narrow shapes."""
-    factor = {"diamond": 0.47, "parallelogram": 0.72, "can": 0.72,
+    factor = {"diamond": 0.35, "parallelogram": 0.72, "can": 0.72,
               "flowChartDocument": 0.72}.get(geom, 0.84)
     usable_w, usable_h = max(12, w * factor - 8), max(12, h * 0.72 - 6)
     for size in range(1200, 599, -50):
@@ -86,7 +89,7 @@ def _shape(sid: int, name: str, x: float, y: float, w: float, h: float, *,
         f'{fill_xml}'
         f'<a:ln w="12700"><a:solidFill><a:srgbClr val="{_color(line)}"/></a:solidFill></a:ln>'
         '</p:spPr>' + (_text(text, _fit_text(text, w, h, geom)[0],
-                              font_scale=_fit_text(text, w, h, geom)[1]) if fit and text
+                              font_scale=_fit_text(text, w, h, geom)[1], tight=True) if fit and text
                        else _text(text, size) if text else '') + '</p:sp>'
     )
 
@@ -209,7 +212,7 @@ def emit_pptx(diagram: Diagram, out_path: str, *, icon_cache: str | None = None)
                              fill=fill, line=line, opacity=30000 if modern else None))
         sid += 1
         shapes.append(_shape(sid, f"Lane label {lane_id}", lb.x+8, lb.y+38, min(150, lb.w-16), 24,
-                             fill=fill, line=fill, text=lane_label))
+                             fill=fill, line=fill, text=lane_label, size=900 if modern else 1200))
         sid += 1
     for group in diagram.groups:
         gb = layout.group_boxes.get(group.id)
@@ -218,7 +221,8 @@ def emit_pptx(diagram: Diagram, out_path: str, *, icon_cache: str | None = None)
                                  fill="F1F5F9", line="9AA5B1"))
             sid += 1
             shapes.append(_shape(sid, f"Group label {group.id}", gb.x+8, gb.y+38, min(150, gb.w-16), 24,
-                                 fill="F1F5F9", line="F1F5F9", text=group.display_label))
+                                 fill="F1F5F9", line="F1F5F9", text=group.display_label,
+                                 size=900 if modern else 1200))
             sid += 1
     for edge in diagram.edges:
         if modern:
@@ -273,22 +277,13 @@ def emit_pptx(diagram: Diagram, out_path: str, *, icon_cache: str | None = None)
     slide = (f'<p:sld xmlns:p="{P}" xmlns:a="{A}" xmlns:r="{R}"><p:cSld>'
              + _tree_start() + ''.join(shapes) + '</p:spTree></p:cSld>'
              '<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>')
-    blank = _tree_start() + '</p:spTree>'
-    layout_xml = (f'<p:sldLayout xmlns:p="{P}" xmlns:a="{A}" xmlns:r="{R}" type="blank" preserve="1">'
-                  f'<p:cSld name="Blank">{blank}</p:cSld>'
-                  '<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>')
-    master = (f'<p:sldMaster xmlns:p="{P}" xmlns:a="{A}" xmlns:r="{R}">'
-              f'<p:cSld>{blank}</p:cSld><p:clrMap accent1="accent1" accent2="accent2" '
-              'accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" '
-              'bg1="lt1" bg2="lt2" folHlink="folHlink" hlink="hlink" tx1="dk1" tx2="dk2"/>'
-              '<p:sldLayoutIdLst><p:sldLayoutId id="2147483649" r:id="rId1"/></p:sldLayoutIdLst>'
-              '</p:sldMaster>')
-    presentation = (f'<p:presentation xmlns:p="{P}" xmlns:a="{A}" xmlns:r="{R}">'
-                    '<p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rId1"/></p:sldMasterIdLst>'
-                    '<p:sldIdLst><p:sldId id="256" r:id="rId2"/></p:sldIdLst>'
-                    f'<p:sldSz cx="{_n(max(layout.width, (layout.height+36)*16/9) if modern else layout.width)}" '
-                    f'cy="{_n(max(layout.height+36, layout.width*9/16) if modern else layout.height+36)}" type="cust"/>'
-                    '<p:notesSz cx="6858000" cy="9144000"/></p:presentation>')
+    static = Path(__file__).with_name("pptx_parts")
+    presentation = (static / "presentation.xml").read_text(encoding="utf-8")
+    slide_width = max(layout.width, (layout.height+36)*16/9) if modern else layout.width
+    slide_height = max(layout.height+36, layout.width*9/16) if modern else layout.height+36
+    presentation = re.sub(r'<p:sldSz\b[^>]*/>',
+                          f'<p:sldSz cx="{_n(slide_width)}" cy="{_n(slide_height)}"/>',
+                          presentation, count=1)
     content_types = (
         '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
         '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
@@ -299,6 +294,9 @@ def emit_pptx(diagram: Diagram, out_path: str, *, icon_cache: str | None = None)
         '<Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml"/>'
         '<Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml"/>'
         '<Override PartName="/ppt/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>'
+        '<Override PartName="/ppt/presProps.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presProps+xml"/>'
+        '<Override PartName="/ppt/viewProps.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.viewProps+xml"/>'
+        '<Override PartName="/ppt/tableStyles.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.tableStyles+xml"/>'
         '</Types>'
     )
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
@@ -309,19 +307,27 @@ def emit_pptx(diagram: Diagram, out_path: str, *, icon_cache: str | None = None)
         write_stable(zf, 'ppt/_rels/presentation.xml.rels', _rels([
             ('rId1', f'{R}/slideMaster', 'slideMasters/slideMaster1.xml'),
             ('rId2', f'{R}/slide', 'slides/slide1.xml'),
+            ('rId3', f'{R}/presProps', 'presProps.xml'),
+            ('rId4', f'{R}/viewProps', 'viewProps.xml'),
+            ('rId5', f'{R}/theme', 'theme/theme1.xml'),
+            ('rId6', f'{R}/tableStyles', 'tableStyles.xml'),
         ]))
         write_stable(zf, 'ppt/slides/slide1.xml', slide)
         write_stable(zf, 'ppt/slides/_rels/slide1.xml.rels', _rels(slide_rels))
-        write_stable(zf, 'ppt/slideLayouts/slideLayout1.xml', layout_xml)
+        write_stable(zf, 'ppt/slideLayouts/slideLayout1.xml',
+                     (static / 'slideLayout1.xml').read_bytes())
         write_stable(zf, 'ppt/slideLayouts/_rels/slideLayout1.xml.rels', _rels([
             ('rId1', f'{R}/slideMaster', '../slideMasters/slideMaster1.xml'),
         ]))
-        write_stable(zf, 'ppt/slideMasters/slideMaster1.xml', master)
+        write_stable(zf, 'ppt/slideMasters/slideMaster1.xml',
+                     (static / 'slideMaster1.xml').read_bytes())
         write_stable(zf, 'ppt/slideMasters/_rels/slideMaster1.xml.rels', _rels([
             ('rId1', f'{R}/slideLayout', '../slideLayouts/slideLayout1.xml'),
-            ('rId2', f'{R}/theme', '../theme/theme1.xml'),
+            ('rId12', f'{R}/theme', '../theme/theme1.xml'),
         ]))
-        write_stable(zf, 'ppt/theme/theme1.xml', _theme())
+        for name in ('theme1.xml', 'presProps.xml', 'viewProps.xml', 'tableStyles.xml'):
+            part = ('ppt/theme/theme1.xml' if name == 'theme1.xml' else f'ppt/{name}')
+            write_stable(zf, part, (static / name).read_bytes())
         for fname, data in media.items():
             write_stable(zf, f'ppt/media/{fname}', data)
     return warnings

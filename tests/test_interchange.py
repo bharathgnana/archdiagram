@@ -33,7 +33,9 @@ class TestInterchange(unittest.TestCase):
         self.assertEqual(ET.tostring(ET.fromstring(model)).strip(), ET.tostring(expected).strip())
 
     def test_modern_pptx_has_editable_polyline_and_fit_text(self):
-        payload = render(shape_spec(), "pptx").content
+        spec = shape_spec()
+        spec["nodes"][3]["label"] = "A very long decision label that must stay within its diamond"
+        payload = render(spec, "pptx").content
         with zipfile.ZipFile(io.BytesIO(payload)) as archive:
             slide = ET.fromstring(archive.read("ppt/slides/slide1.xml"))
             presentation = ET.fromstring(archive.read("ppt/presentation.xml"))
@@ -45,6 +47,7 @@ class TestInterchange(unittest.TestCase):
         size = presentation.find("p:sldSz", ns)
         self.assertAlmostEqual(int(size.get("cx")) / int(size.get("cy")), 16 / 9, places=3)
         self.assertTrue(slide.findall(".//p:sp/p:txBody", ns))
+        self.assertTrue(slide.findall(".//a:normAutofit", ns))
 
     def test_modern_vsdx_has_routed_geometry_and_character_size(self):
         payload = render(shape_spec(), "vsdx").content
