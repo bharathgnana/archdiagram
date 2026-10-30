@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from ..layout.engine import ICON_SIZE
 from ..rasterize.resvg import NodeBridgeError, rasterize_icons, rasterizer_available
-from ..registry.catalog import get_catalog
+from ..registry.catalog import catalog_for
 from ..registry.icons import IconResolver
 from ..spec.model import Diagram
 
@@ -18,7 +18,7 @@ from ..spec.model import Diagram
 def node_icon_pngs(
     diagram: Diagram, resolver: IconResolver, scale: float = 2.0
 ) -> tuple[dict[str, bytes], list[str]]:
-    catalog = get_catalog()
+    catalog = catalog_for(diagram)
     warnings: list[str] = []
 
     node_relpath: dict[str, str] = {}

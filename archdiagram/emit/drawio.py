@@ -15,7 +15,7 @@ from __future__ import annotations
 import html
 
 from ..layout.engine import ICON_SIZE, layout_diagram
-from ..registry.catalog import get_catalog
+from ..registry.catalog import catalog_for
 from ..registry.icons import IconResolver
 from ..spec.model import Diagram
 from .svgcanvas import _lighten
@@ -81,7 +81,7 @@ def emit_drawio(diagram: Diagram, mode: str = PORTABLE, *, icon_cache: str | Non
         raise ValueError(f"drawio mode must be '{NATIVE}' or '{PORTABLE}', got '{mode}'")
 
     layout = layout_diagram(diagram)
-    catalog = get_catalog()
+    catalog = catalog_for(diagram)
     resolver = IconResolver(icon_cache)
 
     page_w = int(layout.width)

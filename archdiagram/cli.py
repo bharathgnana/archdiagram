@@ -11,14 +11,11 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 
-from .emit.drawio import NATIVE, PORTABLE, emit_drawio
-from .emit.pdf import PdfDependencyError, emit_pdf
-from .emit.pptx import emit_pptx
-from .emit.svg import render_html, render_svg
-from .emit.vsdx import emit_vsdx
+from .emit.pdf import PdfDependencyError
+from .engine import render_to_file
+from .formats import FORMATS, get_format
 from .registry.catalog import get_catalog
 from .spec.validate import SpecError, SpecValidationError, load_spec
 from .templates import get_template, list_templates, suggest_template
@@ -42,48 +39,22 @@ def _cmd_validate(args: argparse.Namespace) -> int:
 
 def _default_out(spec_path: str, fmt: str) -> str:
     base = spec_path.rsplit(".", 1)[0] if "." in spec_path else spec_path
-    ext = {"pdf": "pdf", "drawio": "drawio", "vsdx": "vsdx", "svg": "svg", "html": "html", "pptx": "pptx"}[fmt]
-    return f"{base}.{ext}"
+    return f"{base}{get_format(fmt).extension}"
 
 
 def _cmd_render(args: argparse.Namespace) -> int:
+    out_path = args.output or _default_out(args.spec, args.format)
     try:
-        diagram = load_spec(args.spec)
+        result = render_to_file(args.spec, args.format, out_path,
+                                icon_cache=args.icons, drawio_mode=args.drawio_mode)
     except SpecError as exc:
         print(str(exc), file=sys.stderr)
         return 1
-
-    out_path = args.output or _default_out(args.spec, args.format)
-    warnings: list[str] = []
-    try:
-        if args.format == "pdf":
-            warnings = emit_pdf(diagram, out_path, icon_cache=args.icons)
-        elif args.format == "drawio":
-            mode = PORTABLE if args.drawio_mode == "portable" else NATIVE
-            xml = emit_drawio(diagram, mode=mode, icon_cache=args.icons)
-            os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
-            with open(out_path, "w", encoding="utf-8") as fh:
-                fh.write(xml)
-        elif args.format == "vsdx":
-            warnings = emit_vsdx(diagram, out_path, icon_cache=args.icons)
-        elif args.format == "pptx":
-            warnings = emit_pptx(diagram, out_path, icon_cache=args.icons)
-        elif args.format in ("svg", "html"):
-            content, warnings = (
-                render_svg(diagram, icon_cache=args.icons)
-                if args.format == "svg" else render_html(diagram, icon_cache=args.icons)
-            )
-            os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
-            with open(out_path, "w", encoding="utf-8") as fh:
-                fh.write(content)
-        else:  # pragma: no cover - argparse restricts choices
-            print(f"unknown format: {args.format}", file=sys.stderr)
-            return 2
     except PdfDependencyError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 3
 
-    for warning in warnings:
+    for warning in result.warnings:
         print(f"warning: {warning}", file=sys.stderr)
     print(f"wrote {out_path}")
     return 0
@@ -131,7 +102,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_ren = sub.add_parser("render", help="render a spec to a diagram file")
     p_ren.add_argument("spec", help="path to spec JSON (or JSON string)")
     p_ren.add_argument(
-        "--format", "-f", required=True, choices=["pdf", "drawio", "vsdx", "svg", "html", "pptx"], help="output format"
+        "--format", "-f", required=True, choices=list(FORMATS), help="output format"
     )
     p_ren.add_argument("--output", "-o", help="output path (default: alongside spec)")
     p_ren.add_argument(

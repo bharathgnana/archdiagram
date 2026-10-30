@@ -5,14 +5,14 @@ from __future__ import annotations
 import html
 
 from ..layout.engine import layout_diagram
-from ..registry.catalog import get_catalog
+from ..registry.catalog import catalog_for
 from ..registry.icons import IconResolver
 from ..spec.model import Diagram
 from .svgcanvas import build_page_svg
 
 
 def render_svg(diagram: Diagram, *, icon_cache: str | None = None) -> tuple[str, list[str]]:
-    catalog = get_catalog()
+    catalog = catalog_for(diagram)
     resolver = IconResolver(icon_cache)
     uris: dict[str, str] = {}
     warnings: list[str] = []

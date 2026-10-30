@@ -7,7 +7,7 @@ import os
 import zipfile
 
 from ..layout.engine import ICON_SIZE, layout_diagram
-from ..registry.catalog import get_catalog
+from ..registry.catalog import catalog_for
 from ..registry.icons import IconResolver
 from ..spec.model import Diagram
 from .iconglyph import node_icon_pngs
@@ -129,7 +129,7 @@ def _theme() -> str:
 def emit_pptx(diagram: Diagram, out_path: str, *, icon_cache: str | None = None) -> list[str]:
     """Write a PPTX. Shapes and text remain editable; vendor icons are embedded PNGs."""
     layout = layout_diagram(diagram)
-    catalog = get_catalog()
+    catalog = catalog_for(diagram)
     images, warnings = node_icon_pngs(diagram, IconResolver(icon_cache))
     shapes: list[str] = []
     slide_rels = [("rId1", f"{R}/slideLayout", "../slideLayouts/slideLayout1.xml")]

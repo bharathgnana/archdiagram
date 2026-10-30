@@ -17,7 +17,7 @@ import math
 import zipfile
 
 from ..layout.engine import ICON_SIZE, layout_diagram
-from ..registry.catalog import get_catalog
+from ..registry.catalog import catalog_for
 from ..registry.icons import IconResolver
 from ..spec.model import Diagram
 from .iconglyph import node_icon_pngs
@@ -266,7 +266,7 @@ def emit_vsdx(
     """Write ``diagram`` to a .vsdx file. Returns non-fatal warnings."""
 
     layout = layout_diagram(diagram)
-    catalog = get_catalog()
+    catalog = catalog_for(diagram)
     resolver = IconResolver(icon_cache)
     node_pngs, warnings = node_icon_pngs(diagram, resolver, raster_scale)
 

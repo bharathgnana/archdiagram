@@ -16,6 +16,8 @@ import os
 from dataclasses import dataclass
 from functools import lru_cache
 
+from ..spec.model import Diagram
+
 _CATALOG_DIR = os.path.join(os.path.dirname(__file__), "catalog_data")
 
 # Neutral fallback accent for unknown vendors.
@@ -168,3 +170,13 @@ def get_catalog() -> Catalog:
         for service, entry in _load_manifest(manifest, accents).items():
             entries.setdefault(service, entry)
     return Catalog(entries, accents)
+
+
+_SHAPE_ONLY_CATALOG = Catalog({}, {
+    "azure": "#0078D4", "aws": "#ED7100", "gcp": "#4285F4", "kubernetes": "#326CE5",
+})
+
+
+def catalog_for(diagram: Diagram) -> Catalog:
+    """Avoid loading vendor service metadata for shape-only diagrams."""
+    return get_catalog() if any(node.service is not None for node in diagram.nodes) else _SHAPE_ONLY_CATALOG

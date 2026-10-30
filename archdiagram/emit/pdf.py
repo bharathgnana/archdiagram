@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from ..layout.engine import layout_diagram
 from ..rasterize.resvg import NodeBridgeError, pdf_bridge_available, svg_to_pdf
-from ..registry.catalog import get_catalog
+from ..registry.catalog import catalog_for
 from ..registry.icons import IconResolver
 from ..spec.model import Diagram
 from .iconglyph import node_icon_pngs
@@ -51,6 +51,6 @@ def emit_pdf(
     except NodeBridgeError:
         node_pngs, warnings = {}, ["rasteriser failed -> all nodes use fallback boxes"]
 
-    svg = build_page_svg(diagram, layout, get_catalog(), node_pngs)
+    svg = build_page_svg(diagram, layout, catalog_for(diagram), node_pngs)
     svg_to_pdf(svg, out_path, width=layout.width, height=layout.height + 36, title=diagram.title)
     return warnings
