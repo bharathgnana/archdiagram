@@ -1,0 +1,7 @@
+{
+  "name": "archdiagram-marketplace",
+  "owner": {"name": "Bharath Adapa"},
+  "plugins": [
+    {"name": "archdiagram", "source": "./"}
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "archdiagram",
+  "version": "0.2.0",
+  "description": "Generate architecture, process, decision, and data flow diagrams from JSON specs.",
+  "mcpServers": {
+    "archdiagram": {
+      "command": "python",
+      "args": ["-m", "mcp_server.server"],
+      "cwd": "${CLAUDE_PLUGIN_ROOT}"
+    }
+  }
+}
