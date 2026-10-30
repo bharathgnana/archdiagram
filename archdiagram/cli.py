@@ -107,7 +107,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_ren.add_argument("--output", "-o", help="output path (default: alongside spec)")
     p_ren.add_argument(
         "--drawio-mode",
-        choices=["native", "portable"],
+        choices=["native", "portable", "compressed"],
         default="portable",
         help="drawio icon strategy (default: portable, best for Lucid import)",
     )

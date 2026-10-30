@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-from .emit.drawio import NATIVE, PORTABLE, emit_drawio
+from .emit.drawio import COMPRESSED, NATIVE, PORTABLE, emit_drawio
 from .emit.pdf import emit_pdf
 from .emit.pptx import emit_pptx
 from .emit.svg import render_html, render_svg
@@ -36,7 +36,7 @@ def _file_renderer(emitter: Callable, extension: str) -> Renderer:
 
 
 def _drawio(diagram: Diagram, icon_cache: str | None, drawio_mode: str) -> tuple[bytes, list[str]]:
-    mode = PORTABLE if drawio_mode == "portable" else NATIVE
+    mode = {"portable": PORTABLE, "native": NATIVE, "compressed": COMPRESSED}[drawio_mode]
     return emit_drawio(diagram, mode=mode, icon_cache=icon_cache).encode("utf-8"), []
 
 

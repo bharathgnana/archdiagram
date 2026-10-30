@@ -1,4 +1,4 @@
-"""draw.io (.drawio) emitter - dual mode.
+"""draw.io (.drawio) emitter with native, portable, and compressed modes.
 
 - ``native``   : use draw.io's built-in vendor stencil/style strings. Ideal for
                  editing inside draw.io itself; will NOT render in Lucid.
@@ -6,13 +6,16 @@
                  data URI so the diagram renders outside draw.io's asset host
                  (best chance of icons surviving a Lucid import). Default.
 
-Both modes produce uncompressed mxfile XML with the mandatory ``id=0`` root and
-``id=1`` default layer. Pure stdlib string building.
+All modes include the mandatory ``id=0`` root and ``id=1`` default layer.
+Compressed mode wraps the portable model in raw-deflate/base64 form.
 """
 
 from __future__ import annotations
 
 import html
+import base64
+import urllib.parse
+import zlib
 
 from ..layout.engine import ICON_SIZE, lane_bands, layout_diagram
 from ..registry.catalog import catalog_for
@@ -23,6 +26,7 @@ from .svgcanvas import _lighten
 
 NATIVE = "native"
 PORTABLE = "portable"
+COMPRESSED = "compressed"
 
 _FALLBACK_NODE_STYLE = (
     "rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;"
@@ -55,6 +59,20 @@ def _portable_style(data_uri: str) -> str:
     )
 
 
+def _compressed_xml(xml: str) -> str:
+    """Wrap the model XML using diagrams.net's URI-encoded raw-deflate form."""
+    start = xml.index("<mxGraphModel ")
+    end = xml.index("</mxGraphModel>", start) + len("</mxGraphModel>")
+    model = xml[start:end]
+    encoded = urllib.parse.quote(model, safe="-_.!~*'()")
+    compressor = zlib.compressobj(wbits=-15)
+    payload = base64.b64encode(compressor.compress(encoded.encode("utf-8")) +
+                               compressor.flush()).decode("ascii")
+    prefix = xml[:start]
+    suffix = xml[end:]
+    return prefix + payload + suffix
+
+
 def _cell(
     cell_id: str,
     value: str,
@@ -78,8 +96,8 @@ def _cell(
 
 
 def emit_drawio(diagram: Diagram, mode: str = PORTABLE, *, icon_cache: str | None = None) -> str:
-    if mode not in (NATIVE, PORTABLE):
-        raise ValueError(f"drawio mode must be '{NATIVE}' or '{PORTABLE}', got '{mode}'")
+    if mode not in (NATIVE, PORTABLE, COMPRESSED):
+        raise ValueError(f"drawio mode must be '{NATIVE}', '{PORTABLE}', or '{COMPRESSED}', got '{mode}'")
 
     layout = layout_diagram(diagram)
     catalog = catalog_for(diagram)
@@ -145,7 +163,7 @@ def emit_drawio(diagram: Diagram, mode: str = PORTABLE, *, icon_cache: str | Non
 
         if entry is not None and mode == NATIVE and entry.native_style:
             style = entry.native_style
-        elif entry is not None and (mode == PORTABLE or not entry.native_style):
+        elif entry is not None and (mode in (PORTABLE, COMPRESSED) or not entry.native_style):
             data_uri = resolver.data_uri(entry.icon)
             if data_uri:
                 style = _portable_style(data_uri)
@@ -179,7 +197,7 @@ def emit_drawio(diagram: Diagram, mode: str = PORTABLE, *, icon_cache: str | Non
         f'arrows="1" fold="1" page="1" pageScale="1" pageWidth="{page_w}" '
         f'pageHeight="{page_h}" math="0" shadow="0"'
     )
-    return (
+    xml = (
         '<mxfile host="archdiagram" type="device">\n'
         f'  <diagram id="page-1" name="{_attr(diagram.title)}">\n'
         f"    <mxGraphModel {model_attrs}>\n"
@@ -192,3 +210,4 @@ def emit_drawio(diagram: Diagram, mode: str = PORTABLE, *, icon_cache: str | Non
         "  </diagram>\n"
         "</mxfile>\n"
     )
+    return _compressed_xml(xml) if mode == COMPRESSED else xml

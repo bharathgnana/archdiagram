@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import html
+import math
 import os
 import zipfile
 
@@ -11,6 +12,8 @@ from ..registry.catalog import catalog_for
 from ..registry.icons import IconResolver
 from ..spec.model import Diagram
 from ..shapes import SHAPES
+from ..normalize import is_modern_diagram
+from ..routing import label_position, route_edge
 from .iconglyph import node_icon_pngs
 from .svgcanvas import edge_endpoints
 from .ziputil import write_stable
@@ -34,18 +37,42 @@ def _color(value: str) -> str:
     return value.lstrip("#").upper()
 
 
-def _text(text: str, size: int = 1200, color: str = "1B1F24") -> str:
+def _text(text: str, size: int = 1200, color: str = "1B1F24", *,
+          font_scale: int | None = None) -> str:
+    autofit = f'<a:normAutofit fontScale="{font_scale}"/>' if font_scale else ''
+    body_pr = (f'<a:bodyPr wrap="square" anchor="ctr">{autofit}</a:bodyPr>'
+               if font_scale else '<a:bodyPr wrap="square" anchor="ctr"/>')
     return (
-        '<p:txBody><a:bodyPr wrap="square" anchor="ctr"/><a:lstStyle/>'
+        f'<p:txBody>{body_pr}<a:lstStyle/>'
         '<a:p><a:pPr algn="ctr"/><a:r>'
         f'<a:rPr lang="en-US" sz="{size}"><a:solidFill><a:srgbClr val="{color}"/></a:solidFill></a:rPr>'
         f'<a:t>{_e(text)}</a:t></a:r><a:endParaRPr lang="en-US"/></a:p></p:txBody>'
     )
 
 
+def _fit_text(label: str, w: float, h: float, geom: str) -> tuple[int, int | None]:
+    """Choose readable type and a final Office shrink factor for narrow shapes."""
+    factor = {"diamond": 0.47, "parallelogram": 0.72, "can": 0.72,
+              "flowChartDocument": 0.72}.get(geom, 0.84)
+    usable_w, usable_h = max(12, w * factor - 8), max(12, h * 0.72 - 6)
+    for size in range(1200, 599, -50):
+        px = size / 75
+        capacity = max(1, int(usable_w / (px * 0.56)))
+        lines = sum(max(1, math.ceil(len(word) / capacity)) for word in label.splitlines())
+        if not lines:
+            lines = max(1, math.ceil(len(label) / capacity))
+        if lines * px * 1.17 <= usable_h and len(label) <= capacity * max(1, int(usable_h / (px * 1.17))):
+            return size, None
+    # Let Office shrink the text further when even the readable minimum overflows.
+    capacity = max(1, int(usable_w / (8 * 0.56)))
+    estimated = max(1, math.ceil(len(label) / capacity)) * 8 * 1.17
+    return 600, max(10000, min(100000, int(100000 * usable_h / estimated)))
+
+
 def _shape(sid: int, name: str, x: float, y: float, w: float, h: float, *,
            geom: str = "rect", fill: str = "FFFFFF", line: str = "486581",
-           text: str = "", size: int = 1200, opacity: int | None = None) -> str:
+           text: str = "", size: int = 1200, opacity: int | None = None,
+           fit: bool = False) -> str:
     fill_xml = (f'<a:solidFill><a:srgbClr val="{_color(fill)}"/></a:solidFill>'
                 if opacity is None else
                 f'<a:solidFill><a:srgbClr val="{_color(fill)}"><a:alpha val="{opacity}"/>'
@@ -58,7 +85,36 @@ def _shape(sid: int, name: str, x: float, y: float, w: float, h: float, *,
         f'</a:xfrm><a:prstGeom prst="{geom}"><a:avLst/></a:prstGeom>'
         f'{fill_xml}'
         f'<a:ln w="12700"><a:solidFill><a:srgbClr val="{_color(line)}"/></a:solidFill></a:ln>'
-        '</p:spPr>' + (_text(text, size) if text else '') + '</p:sp>'
+        '</p:spPr>' + (_text(text, _fit_text(text, w, h, geom)[0],
+                              font_scale=_fit_text(text, w, h, geom)[1]) if fit and text
+                       else _text(text, size) if text else '') + '</p:sp>'
+    )
+
+
+def _polyline(sid: int, points: list[tuple[float, float]], *, directed: bool,
+              dashed: bool, color: str) -> str:
+    """Editable polyline shape; PowerPoint repairs custom connector geometry."""
+    left = min(x for x, _ in points)
+    top = min(y for _, y in points)
+    width = max(1, _n(max(x for x, _ in points) - left))
+    height = max(1, _n(max(y for _, y in points) - top))
+    commands = []
+    for index, (x, y) in enumerate(points):
+        tag = 'moveTo' if index == 0 else 'lnTo'
+        commands.append(f'<a:{tag}><a:pt x="{_n(x-left)}" y="{_n(y-top)}"/></a:{tag}>')
+    dash = '<a:prstDash val="dash"/>' if dashed else ''
+    arrow = '<a:tailEnd type="triangle"/>' if directed else ''
+    return (
+        '<p:sp><p:nvSpPr>'
+        f'<p:cNvPr id="{sid}" name="Routed edge {sid}"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>'
+        f'<p:spPr><a:xfrm><a:off x="{_n(left)}" y="{_n(top)}"/>'
+        f'<a:ext cx="{width}" cy="{height}"/></a:xfrm>'
+        '<a:custGeom><a:avLst/><a:gdLst/><a:ahLst/><a:cxnLst/>'
+        '<a:rect l="l" t="t" r="r" b="b"/><a:pathLst>'
+        f'<a:path w="{width}" h="{height}" fill="none">{''.join(commands)}</a:path>'
+        '</a:pathLst></a:custGeom><a:noFill/>'
+        f'<a:ln w="19050"><a:solidFill><a:srgbClr val="{color}"/></a:solidFill>'
+        f'{dash}{arrow}</a:ln></p:spPr></p:sp>'
     )
 
 
@@ -134,6 +190,7 @@ def _theme() -> str:
 def emit_pptx(diagram: Diagram, out_path: str, *, icon_cache: str | None = None) -> list[str]:
     """Write a PPTX. Shapes and text remain editable; vendor icons are embedded PNGs."""
     layout = layout_diagram(diagram)
+    modern = is_modern_diagram(diagram)
     catalog = catalog_for(diagram)
     images, warnings = node_icon_pngs(diagram, IconResolver(icon_cache))
     shapes: list[str] = []
@@ -164,13 +221,22 @@ def emit_pptx(diagram: Diagram, out_path: str, *, icon_cache: str | None = None)
                                  fill="F1F5F9", line="F1F5F9", text=group.display_label))
             sid += 1
     for edge in diagram.edges:
-        x1, y1, x2, y2 = edge_endpoints(diagram, layout, edge)
-        shapes.append(_line(sid, x1, y1+36, x2, y2+36,
-                            directed=edge.directed, dashed=edge.kind == "data" or edge.dashed,
-                            color=_color(edge.color or "#5B6470")))
+        if modern:
+            points = route_edge(diagram, layout, edge)
+            shapes.append(_polyline(sid, [(x, y+36) for x, y in points],
+                                    directed=edge.directed,
+                                    dashed=edge.kind == "data" or edge.dashed,
+                                    color=_color(edge.color or "#5B6470")))
+            lx, ly = label_position(points)
+        else:
+            x1, y1, x2, y2 = edge_endpoints(diagram, layout, edge)
+            shapes.append(_line(sid, x1, y1+36, x2, y2+36,
+                                directed=edge.directed, dashed=edge.kind == "data" or edge.dashed,
+                                color=_color(edge.color or "#5B6470")))
+            lx, ly = (x1+x2)/2, (y1+y2)/2
         sid += 1
         if edge.label:
-            shapes.append(_shape(sid, f"Edge label {sid}", (x1+x2)/2-38, (y1+y2)/2+27,
+            shapes.append(_shape(sid, f"Edge label {sid}", lx-38, ly+27,
                                  76, 18, fill="FFFFFF", line="FFFFFF", text=edge.label, size=1000))
             sid += 1
     geom = {"process":"roundRect", "decision":"diamond", "data":"parallelogram",
@@ -183,7 +249,7 @@ def emit_pptx(diagram: Diagram, out_path: str, *, icon_cache: str | None = None)
                                  geom=style.pptx if style else geom[node.kind],
                                  fill=style.fill if style else "F1F5F9",
                                  line=style.stroke if style else "486581",
-                                 text=node.display_label))
+                                 text=node.display_label, fit=modern))
             sid += 1
             continue
         ix, iy, iw, ih = box.icon_rect(ICON_SIZE, ICON_SIZE)
@@ -220,7 +286,8 @@ def emit_pptx(diagram: Diagram, out_path: str, *, icon_cache: str | None = None)
     presentation = (f'<p:presentation xmlns:p="{P}" xmlns:a="{A}" xmlns:r="{R}">'
                     '<p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rId1"/></p:sldMasterIdLst>'
                     '<p:sldIdLst><p:sldId id="256" r:id="rId2"/></p:sldIdLst>'
-                    f'<p:sldSz cx="{_n(layout.width)}" cy="{_n(layout.height+36)}" type="cust"/>'
+                    f'<p:sldSz cx="{_n(max(layout.width, (layout.height+36)*16/9) if modern else layout.width)}" '
+                    f'cy="{_n(max(layout.height+36, layout.width*9/16) if modern else layout.height+36)}" type="cust"/>'
                     '<p:notesSz cx="6858000" cy="9144000"/></p:presentation>')
     content_types = (
         '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'

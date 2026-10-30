@@ -21,6 +21,8 @@ from ..registry.catalog import catalog_for
 from ..registry.icons import IconResolver
 from ..spec.model import Diagram
 from ..shapes import SHAPES
+from ..normalize import is_modern_diagram
+from ..routing import label_position, route_edge
 from .iconglyph import node_icon_pngs
 from .svgcanvas import _esc, _lighten, edge_endpoints
 from .ziputil import write_stable
@@ -197,6 +199,7 @@ def _rect_shape(
     font_color: str = "#1B1F24",
     kind: str = "process",
     opacity: float | None = None,
+    font_size: int | None = None,
 ) -> str:
     pin_x = _in(x + w / 2)
     pin_y = _in(page_h - (y + h / 2))
@@ -223,12 +226,16 @@ def _rect_shape(
     cells.append(f'      <Cell N="LineColor2" V="{font_color}"/>')
     if valign_top:
         cells.append('      <Cell N="VerticalAlign" V="0"/>')
-    text_xml = f"    <Text>{_esc(text)}</Text>\n" if text else ""
+    font_xml = (f'    <Section N="Character" IX="0"><Row IX="0"><Cell N="Size" '
+                f'V="{font_size} pt"/></Row></Section>\n') if font_size else ""
+    text_xml = (f"    <Text><cp IX=\"0\"/>{_esc(text)}</Text>\n" if font_size and text
+                else f"    <Text>{_esc(text)}</Text>\n" if text else "")
     return (
         f'    <Shape ID="{shape_id}" Type="Shape">\n'
         + "\n".join(cells)
         + "\n"
         + (_rect_geometry(noshow_fill=True) if fill is None else _node_geometry(kind))
+        + font_xml
         + text_xml
         + "    </Shape>\n"
     )
@@ -285,6 +292,33 @@ def _line_shape(
     )
 
 
+def _polyline_shape(shape_id: int, points: list[tuple[float, float]], page_h: float,
+                    stroke: str, *, directed: bool, dashed: bool) -> str:
+    left = min(x for x, _ in points)
+    bottom = max(y for _, y in points)
+    width = max(x for x, _ in points) - left
+    height = bottom - min(y for _, y in points)
+    rows = []
+    for index, (x, y) in enumerate(points):
+        kind = 'MoveTo' if index == 0 else 'LineTo'
+        rows.append(f'      <Row T="{kind}" IX="{index+1}"><Cell N="X" V="{_in(x-left)}"/>'
+                    f'<Cell N="Y" V="{_in(bottom-y)}"/></Row>')
+    return (
+        f'    <Shape ID="{shape_id}" Type="Shape">\n'
+        f'      <Cell N="PinX" V="{_in(left)}"/>\n'
+        f'      <Cell N="PinY" V="{_in(page_h-bottom)}"/>\n'
+        f'      <Cell N="Width" V="{_in(width)}"/>\n'
+        f'      <Cell N="Height" V="{_in(height)}"/>\n'
+        '      <Cell N="LocPinX" V="0"/>\n'
+        '      <Cell N="LocPinY" V="0"/>\n'
+        f'      <Cell N="LineColor" V="{stroke}"/>\n'
+        f'      <Cell N="LinePattern" V="{2 if dashed else 1}"/>\n'
+        + ('      <Cell N="EndArrow" V="4"/>\n' if directed else '')
+        + '    <Section N="Geometry" IX="0">\n' + '\n'.join(rows)
+        + '\n    </Section>\n    </Shape>\n'
+    )
+
+
 def emit_vsdx(
     diagram: Diagram,
     out_path: str,
@@ -295,6 +329,7 @@ def emit_vsdx(
     """Write ``diagram`` to a .vsdx file. Returns non-fatal warnings."""
 
     layout = layout_diagram(diagram)
+    modern = is_modern_diagram(diagram)
     catalog = catalog_for(diagram)
     resolver = IconResolver(icon_cache)
     node_pngs, warnings = node_icon_pngs(diagram, resolver, raster_scale)
@@ -334,6 +369,7 @@ def emit_vsdx(
         sid += 1
 
     # Nodes: icon (image or fallback rect) + label.
+    node_start = len(shapes)
     for node in diagram.nodes:
         box = layout.boxes.get(node.id)
         if box is None:
@@ -345,6 +381,7 @@ def emit_vsdx(
                 fill=style.fill if style else "#F1F5F9",
                 stroke=style.stroke if style else "#486581", text=node.display_label,
                 kind=f"modern_{node.shape}" if node.shape else node.kind,
+                font_size=10 if modern else None,
             ))
             sid += 1
             continue
@@ -379,24 +416,35 @@ def emit_vsdx(
             )
             sid += 1
 
-    # Edges as straight connectors.
+    edge_start = len(shapes)
     for edge in diagram.edges:
         src = layout.boxes.get(edge.source)
         dst = layout.boxes.get(edge.target)
         if not src or not dst:
             continue
-        x1, y1, x2, y2 = edge_endpoints(diagram, layout, edge)
-        shapes.append(_line_shape(
-            sid, x1, y1, x2, y2, page_h, edge.color or "#5B6470",
-            directed=edge.directed, dashed=edge.kind == "data" or edge.dashed,
-        ))
+        if modern:
+            points = route_edge(diagram, layout, edge)
+            shapes.append(_polyline_shape(
+                sid, points, page_h, edge.color or "#5B6470",
+                directed=edge.directed, dashed=edge.kind == "data" or edge.dashed))
+            lx, ly = label_position(points)
+        else:
+            x1, y1, x2, y2 = edge_endpoints(diagram, layout, edge)
+            shapes.append(_line_shape(
+                sid, x1, y1, x2, y2, page_h, edge.color or "#5B6470",
+                directed=edge.directed, dashed=edge.kind == "data" or edge.dashed))
+            lx, ly = (x1+x2)/2, (y1+y2)/2
         sid += 1
         if edge.label:
             shapes.append(_rect_shape(
-                sid, (x1+x2)/2 - 44, (y1+y2)/2 - 10, 88, 20, page_h,
+                sid, lx - 44, ly - 10, 88, 20, page_h,
                 fill="#FFFFFF", stroke=None, text=edge.label,
+                font_size=8 if modern else None,
             ))
             sid += 1
+
+    if modern:
+        shapes = shapes[:node_start] + shapes[edge_start:] + shapes[node_start:edge_start]
 
     page1 = (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
