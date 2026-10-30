@@ -8,7 +8,7 @@ from dataclasses import replace
 from .spec.model import Diagram, Edge
 
 
-def _is_modern(diagram: Diagram) -> bool:
+def is_modern_diagram(diagram: Diagram) -> bool:
     return (any(node.shape is not None or node.tier is not None for node in diagram.nodes)
             or any(edge.dashed or edge.color is not None for edge in diagram.edges)
             or diagram.lane_orientation is not None)
@@ -16,7 +16,7 @@ def _is_modern(diagram: Diagram) -> bool:
 
 def normalize_edges(diagram: Diagram) -> tuple[Diagram, list[str]]:
     """Keep the first edge per pair; report every drop and redundant shortcut."""
-    if not _is_modern(diagram):
+    if not is_modern_diagram(diagram):
         return diagram, []
 
     first: set[tuple[str, str]] = set()

@@ -17,6 +17,8 @@ from ..layout.engine import ICON_SIZE, Box, LayoutResult, lane_bands
 from ..registry.catalog import Catalog
 from ..spec.model import Diagram, Edge
 from ..shapes import SHAPES
+from ..normalize import is_modern_diagram
+from ..routing import label_position, route_edge
 
 _FONT = "Segoe UI, Helvetica, Arial, sans-serif"
 
@@ -162,16 +164,25 @@ def build_page_svg(
         dst = layout.boxes.get(edge.target)
         if not src or not dst:
             continue
-        x1, y1, x2, y2 = edge_endpoints(diagram, layout, edge)
         marker = ' marker-end="url(#arrow)"' if edge.directed else ""
         dash = ' stroke-dasharray="6 4"' if edge.kind == "data" or edge.dashed else ""
         stroke = edge.color or "#5B6470"
-        parts.append(
-            f'<line x1="{x1:.1f}" y1="{y1 + dy:.1f}" x2="{x2:.1f}" y2="{y2 + dy:.1f}" '
-            f'stroke="{stroke}" stroke-width="1.5"{dash}{marker}/>'
-        )
-        if edge.label:
+        if is_modern_diagram(diagram):
+            points = route_edge(diagram, layout, edge)
+            path = " ".join(("M" if index == 0 else "L") + f"{x:.1f},{y + dy:.1f}"
+                            for index, (x, y) in enumerate(points))
+            parts.append(f'<path d="{path}" fill="none" stroke="{stroke}" '
+                         f'stroke-width="1.5"{dash}{marker}/>')
+            mx, my = label_position(points)
+            my += dy
+        else:
+            x1, y1, x2, y2 = edge_endpoints(diagram, layout, edge)
+            parts.append(
+                f'<line x1="{x1:.1f}" y1="{y1 + dy:.1f}" x2="{x2:.1f}" y2="{y2 + dy:.1f}" '
+                f'stroke="{stroke}" stroke-width="1.5"{dash}{marker}/>'
+            )
             mx, my = (x1 + x2) / 2, (y1 + y2) / 2 + dy
+        if edge.label:
             parts.append(
                 f'<rect x="{mx - len(edge.label) * 3.4 - 4:.1f}" y="{my - 9:.1f}" '
                 f'width="{len(edge.label) * 6.8 + 8:.1f}" height="14" rx="3" fill="#FFFFFF" '
