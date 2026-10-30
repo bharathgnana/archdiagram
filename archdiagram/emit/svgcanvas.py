@@ -16,6 +16,7 @@ import math
 from ..layout.engine import ICON_SIZE, Box, LayoutResult
 from ..registry.catalog import Catalog
 from ..spec.model import Diagram, Edge
+from ..shapes import SHAPES
 
 _FONT = "Segoe UI, Helvetica, Arial, sans-serif"
 
@@ -163,10 +164,11 @@ def build_page_svg(
             continue
         x1, y1, x2, y2 = edge_endpoints(diagram, layout, edge)
         marker = ' marker-end="url(#arrow)"' if edge.directed else ""
-        dash = ' stroke-dasharray="6 4"' if edge.kind == "data" else ""
+        dash = ' stroke-dasharray="6 4"' if edge.kind == "data" or edge.dashed else ""
+        stroke = edge.color or "#5B6470"
         parts.append(
             f'<line x1="{x1:.1f}" y1="{y1 + dy:.1f}" x2="{x2:.1f}" y2="{y2 + dy:.1f}" '
-            f'stroke="#5B6470" stroke-width="1.5"{dash}{marker}/>'
+            f'stroke="{stroke}" stroke-width="1.5"{dash}{marker}/>'
         )
         if edge.label:
             mx, my = (x1 + x2) / 2, (y1 + y2) / 2 + dy
@@ -187,6 +189,37 @@ def build_page_svg(
             continue
         if node.kind != "service":
             x, y, w, h = box.x, box.y + dy, box.w, box.h
+            if node.shape:
+                style = SHAPES[node.shape]
+                if node.shape == "decision":
+                    shape = (f'<polygon points="{x+w/2:.1f},{y:.1f} {x+w:.1f},{y+h/2:.1f} '
+                             f'{x+w/2:.1f},{y+h:.1f} {x:.1f},{y+h/2:.1f}"')
+                elif node.shape == "io":
+                    shape = (f'<polygon points="{x+18:.1f},{y:.1f} {x+w:.1f},{y:.1f} '
+                             f'{x+w-18:.1f},{y+h:.1f} {x:.1f},{y+h:.1f}"')
+                elif node.shape == "document":
+                    shape = (f'<path d="M{x:.1f},{y:.1f} H{x+w:.1f} V{y+h-12:.1f} '
+                             f'Q{x+w*0.75:.1f},{y+h+4:.1f} {x+w/2:.1f},{y+h-8:.1f} '
+                             f'Q{x+w*0.25:.1f},{y+h-20:.1f} {x:.1f},{y+h-8:.1f} Z"')
+                elif node.shape == "data_store":
+                    shape = (f'<path d="M{x:.1f},{y+12:.1f} C{x:.1f},{y-4:.1f} '
+                             f'{x+w:.1f},{y-4:.1f} {x+w:.1f},{y+12:.1f} '
+                             f'V{y+h-12:.1f} C{x+w:.1f},{y+h+4:.1f} '
+                             f'{x:.1f},{y+h+4:.1f} {x:.1f},{y+h-12:.1f} Z"')
+                else:
+                    radius = h / 2 if node.shape in ("start", "end") else 9
+                    shape = (f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" '
+                             f'height="{h:.1f}" rx="{radius:.1f}"')
+                parts.append(f'{shape} fill="{style.fill}" stroke="{style.stroke}" stroke-width="1.5"/>')
+                if node.shape == "data_store":
+                    parts.append(f'<ellipse cx="{x+w/2:.1f}" cy="{y+12:.1f}" rx="{w/2:.1f}" ry="12" '
+                                 f'fill="none" stroke="{style.stroke}" stroke-width="1.5"/>')
+                parts.append(
+                    f'<text x="{box.cx:.1f}" y="{y + h/2 + 4:.1f}" text-anchor="middle" '
+                    f'font-family="{_FONT}" font-size="12" fill="#1B1F24">'
+                    f'{_esc(_truncate(node.display_label, 18 if node.shape == "decision" else 22))}</text>'
+                )
+                continue
             if node.kind == "decision":
                 shape = f'<polygon points="{x+w/2:.1f},{y:.1f} {x+w:.1f},{y+h/2:.1f} {x+w/2:.1f},{y+h:.1f} {x:.1f},{y+h/2:.1f}"'
             elif node.kind == "data":

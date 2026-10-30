@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 VALID_DIRECTIONS = ("LR", "TB", "RL", "BT")
-VALID_NODE_KINDS = ("service", "process", "decision", "data", "start", "end")
+VALID_NODE_KINDS = ("service", "process", "decision", "data", "start", "end", "io", "document", "data_store")
 VALID_EDGE_KINDS = ("flow", "data")
 
 
@@ -33,6 +33,8 @@ class Node:
     lane: str | None = None
     x: float | None = None
     y: float | None = None
+    shape: str | None = None
+    tier: int | None = None
 
     @property
     def vendor(self) -> str:
@@ -57,6 +59,8 @@ class Edge:
     label: str | None = None
     directed: bool = True
     kind: str = "flow"
+    dashed: bool = False
+    color: str | None = None
 
 
 @dataclass
@@ -99,6 +103,7 @@ class Diagram:
     edges: list[Edge] = field(default_factory=list)
     groups: list[Group] = field(default_factory=list)
     lanes: list[Lane] = field(default_factory=list)
+    lane_orientation: str | None = None
 
     def node_by_id(self, node_id: str) -> Node | None:
         for node in self.nodes:

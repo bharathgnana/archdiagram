@@ -20,6 +20,7 @@ from ..layout.engine import ICON_SIZE, layout_diagram
 from ..registry.catalog import catalog_for
 from ..registry.icons import IconResolver
 from ..spec.model import Diagram
+from ..shapes import SHAPES
 from .iconglyph import node_icon_pngs
 from .svgcanvas import _esc, _lighten, edge_endpoints
 from .ziputil import write_stable
@@ -128,6 +129,31 @@ def _rect_geometry(noshow_fill: bool = False) -> str:
 
 
 def _node_geometry(kind: str) -> str:
+    if kind.startswith("modern_"):
+        modern = kind.removeprefix("modern_")
+        if modern == "document":
+            points = [(0, 0), (1, 0), (1, 0.82), (0.8, 0.9),
+                      (0.6, 0.82), (0.4, 0.9), (0.2, 0.82), (0, 0.9), (0, 0)]
+        elif modern == "data_store":
+            points = [(0, 0.18), (0.1, 0.08), (0.25, 0.02), (0.5, 0),
+                      (0.75, 0.02), (0.9, 0.08), (1, 0.18), (1, 0.82),
+                      (0.9, 0.92), (0.75, 0.98), (0.5, 1), (0.25, 0.98),
+                      (0.1, 0.92), (0, 0.82), (0, 0.18)]
+        elif modern in ("start", "end"):
+            points = [(0.2, 0), (0.8, 0), (0.92, 0.12), (1, 0.3),
+                      (1, 0.7), (0.92, 0.88), (0.8, 1), (0.2, 1),
+                      (0.08, 0.88), (0, 0.7), (0, 0.3), (0.08, 0.12), (0.2, 0)]
+        elif modern == "io":
+            points = [(0.15, 0), (1, 0), (0.85, 1), (0, 1), (0.15, 0)]
+        elif modern == "decision":
+            points = [(0.5, 0), (1, 0.5), (0.5, 1), (0, 0.5), (0.5, 0)]
+        else:
+            return _rect_geometry()
+        rows = []
+        for i, (x, y) in enumerate(points):
+            row_type = "RelMoveTo" if i == 0 else "RelLineTo"
+            rows.append(f'      <Row T="{row_type}" IX="{i+1}"><Cell N="X" V="{x}"/><Cell N="Y" V="{y}"/></Row>')
+        return '    <Section N="Geometry" IX="0">\n' + '\n'.join(rows) + '\n    </Section>\n'
     if kind not in ("decision", "data", "start", "end"):
         return _rect_geometry()
     if kind == "decision":
@@ -310,10 +336,12 @@ def emit_vsdx(
         if box is None:
             continue
         if node.kind != "service":
+            style = SHAPES[node.shape] if node.shape else None
             shapes.append(_rect_shape(
                 sid, box.x, box.y, box.w, box.h, page_h,
-                fill="#F1F5F9", stroke="#486581", text=node.display_label,
-                kind=node.kind,
+                fill=style.fill if style else "#F1F5F9",
+                stroke=style.stroke if style else "#486581", text=node.display_label,
+                kind=f"modern_{node.shape}" if node.shape else node.kind,
             ))
             sid += 1
             continue
@@ -356,8 +384,8 @@ def emit_vsdx(
             continue
         x1, y1, x2, y2 = edge_endpoints(diagram, layout, edge)
         shapes.append(_line_shape(
-            sid, x1, y1, x2, y2, page_h, "#5B6470",
-            directed=edge.directed, dashed=edge.kind == "data",
+            sid, x1, y1, x2, y2, page_h, edge.color or "#5B6470",
+            directed=edge.directed, dashed=edge.kind == "data" or edge.dashed,
         ))
         sid += 1
         if edge.label:

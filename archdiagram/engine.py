@@ -8,6 +8,7 @@ from typing import Any
 
 from .formats import OutputFormat, get_format
 from .layout.engine import LayoutResult, layout_diagram
+from .normalize import normalize_edges
 from .registry.catalog import catalog_for
 from .spec.model import Diagram
 from .spec.validate import load_spec
@@ -34,13 +35,13 @@ def render(source: Any, fmt: str, *, icon_cache: str | None = None,
            drawio_mode: str = "portable") -> RenderResult:
     """Render a raw spec or validated diagram without writing a file."""
     diagram = source if isinstance(source, Diagram) else load_spec(source)
-    # Existing specs already have normalized node/edge objects. The explicit
-    # normalization stage is extended when deduplication is introduced.
+    diagram, normalization_warnings = normalize_edges(diagram)
     catalog_for(diagram)
     layout = layout_diagram(diagram)
     output_format = get_format(fmt)
     content, warnings = output_format.renderer(diagram, icon_cache, drawio_mode)
-    return RenderResult(diagram, output_format, layout, content, tuple(warnings))
+    return RenderResult(diagram, output_format, layout, content,
+                        tuple(normalization_warnings + warnings))
 
 
 def render_to_file(source: Any, fmt: str, out_path: str, *,

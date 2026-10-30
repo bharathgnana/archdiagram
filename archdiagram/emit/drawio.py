@@ -18,6 +18,7 @@ from ..layout.engine import ICON_SIZE, layout_diagram
 from ..registry.catalog import catalog_for
 from ..registry.icons import IconResolver
 from ..spec.model import Diagram
+from ..shapes import SHAPES
 from .svgcanvas import _lighten
 
 NATIVE = "native"
@@ -127,10 +128,16 @@ def emit_drawio(diagram: Diagram, mode: str = PORTABLE, *, icon_cache: str | Non
         if box is None:
             continue
         if node.kind != "service":
-            style = (
-                _KIND_SHAPES[node.kind] + "whiteSpace=wrap;html=1;align=center;verticalAlign=middle;"
-                "fillColor=#F1F5F9;strokeColor=#486581;fontColor=#1B1F24;fontSize=12;"
-            )
+            if node.shape:
+                shape_style = SHAPES[node.shape]
+                style = (shape_style.drawio + "whiteSpace=wrap;html=1;align=center;verticalAlign=middle;"
+                         f"fillColor={shape_style.fill};strokeColor={shape_style.stroke};"
+                         "fontColor=#1B1F24;fontSize=12;")
+            else:
+                style = (
+                    _KIND_SHAPES[node.kind] + "whiteSpace=wrap;html=1;align=center;verticalAlign=middle;"
+                    "fillColor=#F1F5F9;strokeColor=#486581;fontColor=#1B1F24;fontSize=12;"
+                )
             body.append(_cell(f"node_{node.id}", node.display_label, style, box.x, box.y, box.w, box.h))
             continue
         entry = catalog.lookup(node.service)
@@ -155,8 +162,10 @@ def emit_drawio(diagram: Diagram, mode: str = PORTABLE, *, icon_cache: str | Non
         if edge.source not in layout.boxes or edge.target not in layout.boxes:
             continue
         style = _EDGE_STYLE.format(arrow="block" if edge.directed else "none")
-        if edge.kind == "data":
+        if edge.kind == "data" or edge.dashed:
             style += "dashed=1;dashPattern=6 4;"
+        if edge.color:
+            style += f"strokeColor={edge.color};"
         body.append(
             f'        <mxCell id="edge_{i}" value="{_attr(edge.label or "")}" '
             f'style="{_attr(style)}" edge="1" parent="1" '

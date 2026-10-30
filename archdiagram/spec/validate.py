@@ -9,9 +9,13 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from typing import Any
 
 from .model import VALID_DIRECTIONS, VALID_EDGE_KINDS, VALID_NODE_KINDS, Diagram, Edge, Group, Lane, Node
+from ..shapes import SHAPES
+
+_RGB_COLOR = re.compile(r"#?[0-9a-fA-F]{6}\Z")
 
 
 class SpecError(Exception):
@@ -60,11 +64,24 @@ def _validate_node(raw: Any, path: str, col: _Collector) -> Node | None:
         col.add(f"{path}.id", "must not be empty")
         ok = False
 
+    service = raw.get("service")
+    has_shape = "shape" in raw
+    shape = raw.get("shape")
+    if has_shape and (not isinstance(shape, str) or shape not in SHAPES):
+        col.add(f"{path}.shape", f"must be one of {', '.join(SHAPES)}")
+        ok = False
     kind = raw.get("kind", "service")
+    if has_shape and isinstance(shape, str) and shape in SHAPES:
+        if "kind" in raw and kind != shape:
+            col.add(f"{path}.kind", "must match shape when both are provided")
+            ok = False
+        kind = shape
     if not isinstance(kind, str) or kind not in VALID_NODE_KINDS:
         col.add(f"{path}.kind", f"must be one of {', '.join(VALID_NODE_KINDS)}")
         ok = False
-    service = raw.get("service")
+    if has_shape and service is not None:
+        col.add(f"{path}.service", "a node may have a service or a shape, not both")
+        ok = False
     if kind == "service":
         if not col.require_type(f"{path}.service", service, (str,), "string"):
             ok = False
@@ -94,7 +111,12 @@ def _validate_node(raw: Any, path: str, col: _Collector) -> Node | None:
     if y is not None and not col.require_type(f"{path}.y", y, (int, float), "number"):
         ok = False
 
-    _warn_unknown_keys(raw, {"id", "service", "label", "group", "kind", "lane", "x", "y"}, path, col)
+    tier = raw.get("tier")
+    if tier is not None and (not isinstance(tier, int) or isinstance(tier, bool) or tier < 0):
+        col.add(f"{path}.tier", "expected a non-negative integer")
+        ok = False
+
+    _warn_unknown_keys(raw, {"id", "service", "shape", "label", "group", "kind", "lane", "tier", "x", "y"}, path, col)
 
     if not ok:
         return None
@@ -107,6 +129,8 @@ def _validate_node(raw: Any, path: str, col: _Collector) -> Node | None:
         lane=lane,
         x=float(x) if x is not None else None,
         y=float(y) if y is not None else None,
+        shape=shape if has_shape else (kind if kind in ("io", "document", "data_store") else None),
+        tier=tier,
     )
 
 
@@ -136,11 +160,21 @@ def _validate_edge(raw: Any, path: str, col: _Collector) -> Edge | None:
         col.add(f"{path}.kind", f"must be one of {', '.join(VALID_EDGE_KINDS)}")
         ok = False
 
-    _warn_unknown_keys(raw, {"source", "target", "label", "directed", "kind"}, path, col)
+    dashed = raw.get("dashed", False)
+    if not isinstance(dashed, bool):
+        col.add(f"{path}.dashed", "expected boolean")
+        ok = False
+    color = raw.get("color")
+    if color is not None and (not isinstance(color, str) or not _RGB_COLOR.fullmatch(color)):
+        col.add(f"{path}.color", "expected six-digit RGB hex color")
+        ok = False
+
+    _warn_unknown_keys(raw, {"source", "target", "label", "directed", "kind", "dashed", "color"}, path, col)
 
     if not ok:
         return None
-    return Edge(source=source, target=target, label=label, directed=bool(directed), kind=kind)
+    return Edge(source=source, target=target, label=label, directed=bool(directed), kind=kind,
+                dashed=dashed, color=("#" + color.lstrip("#").upper()) if color else None)
 
 
 def _validate_lane(raw: Any, path: str, col: _Collector) -> Lane | None:
@@ -257,7 +291,10 @@ def validate_spec(raw: Any) -> Diagram:
             if lane is not None:
                 lanes.append(lane)
 
-    _warn_unknown_keys(raw, {"title", "direction", "nodes", "edges", "groups", "lanes"}, "<root>", col)
+    lane_orientation = raw.get("lane_orientation")
+    if lane_orientation is not None and lane_orientation not in ("horizontal", "vertical"):
+        col.add("lane_orientation", "must be horizontal or vertical")
+    _warn_unknown_keys(raw, {"title", "direction", "nodes", "edges", "groups", "lanes", "lane_orientation"}, "<root>", col)
 
     # Cross-reference checks (only meaningful once individual items parsed).
     _check_cross_references(nodes, edges, groups, lanes, col)
@@ -265,7 +302,17 @@ def validate_spec(raw: Any) -> Diagram:
     if col.errors:
         raise SpecValidationError(col.errors)
 
-    return Diagram(title=title, direction=direction, nodes=nodes, edges=edges, groups=groups, lanes=lanes)
+    return Diagram(title=title, direction=direction, nodes=nodes, edges=edges, groups=groups,
+                   lanes=lanes, lane_orientation=lane_orientation)
+
+
+def validation_errors(raw: Any) -> list[str]:
+    """Collect all validation errors without changing the raising legacy API."""
+    try:
+        validate_spec(raw)
+    except SpecValidationError as exc:
+        return exc.errors
+    return []
 
 
 def _check_cross_references(

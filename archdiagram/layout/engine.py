@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 from collections import deque
 
 from ..spec.model import Diagram
+from ..shapes import SHAPES
 
 ICON_SIZE = 48
 NODE_W = 132
@@ -164,7 +165,56 @@ def _order_within_layer(node_ids: list[str], diagram: Diagram) -> list[str]:
     return sorted(node_ids, key=lambda nid: (group_rank[group_of[nid]], index[nid]))
 
 
+def _layout_shaped(diagram: Diagram) -> LayoutResult:
+    """Size explicit shapes individually, leaving the legacy grid untouched."""
+    horizontal = diagram.direction in ("LR", "RL")
+    reverse = diagram.direction in ("RL", "BT")
+    layers = _compute_layers(diagram)
+    for node in diagram.nodes:
+        if node.tier is not None:
+            layers[node.id] = node.tier
+    by_layer: dict[int, list[str]] = {}
+    dimensions: dict[str, tuple[int, int]] = {}
+    for node in diagram.nodes:
+        by_layer.setdefault(layers[node.id], []).append(node.id)
+        style = SHAPES.get(node.shape or "")
+        dimensions[node.id] = (style.width, style.height) if style else (NODE_W, NODE_H)
+
+    boxes: dict[str, Box] = {}
+    flow = MARGIN
+    for layer in sorted(by_layer, reverse=reverse):
+        members = _order_within_layer(by_layer[layer], diagram)
+        cross = MARGIN
+        flow_size = max((dimensions[nid][0] if horizontal else dimensions[nid][1])
+                        for nid in members)
+        for node_id in members:
+            width, height = dimensions[node_id]
+            if horizontal:
+                boxes[node_id] = Box(node_id, float(flow), float(cross), width, height)
+                cross += height + V_GAP
+            else:
+                boxes[node_id] = Box(node_id, float(cross), float(flow), width, height)
+                cross += width + H_GAP
+        flow += flow_size + (H_GAP if horizontal else V_GAP)
+
+    for node in diagram.nodes:
+        box = boxes[node.id]
+        if node.x is not None:
+            box.x = node.x
+        if node.y is not None:
+            box.y = node.y
+    group_boxes = _compute_group_boxes(diagram, boxes)
+    _normalize_origin(boxes, group_boxes, {})
+    width = max([MARGIN] + [box.x + box.w for box in boxes.values()] +
+                [box.x + box.w for box in group_boxes.values()]) + MARGIN
+    height = max([MARGIN] + [box.y + box.h for box in boxes.values()] +
+                 [box.y + box.h for box in group_boxes.values()]) + MARGIN
+    return LayoutResult(boxes=boxes, group_boxes=group_boxes, width=width, height=height)
+
+
 def layout_diagram(diagram: Diagram) -> LayoutResult:
+    if any(node.shape is not None or node.tier is not None for node in diagram.nodes):
+        return _layout_shaped(diagram)
     horizontal = diagram.direction in ("LR", "RL")
     reverse = diagram.direction in ("RL", "BT")
 

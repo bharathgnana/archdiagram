@@ -10,6 +10,7 @@ from ..layout.engine import ICON_SIZE, layout_diagram
 from ..registry.catalog import catalog_for
 from ..registry.icons import IconResolver
 from ..spec.model import Diagram
+from ..shapes import SHAPES
 from .iconglyph import node_icon_pngs
 from .svgcanvas import edge_endpoints
 from .ziputil import write_stable
@@ -58,7 +59,7 @@ def _shape(sid: int, name: str, x: float, y: float, w: float, h: float, *,
 
 
 def _line(sid: int, x1: float, y1: float, x2: float, y2: float, *,
-          directed: bool, dashed: bool) -> str:
+          directed: bool, dashed: bool, color: str = "5B6470") -> str:
     flip_h = ' flipH="1"' if x2 < x1 else ''
     flip_v = ' flipV="1"' if y2 < y1 else ''
     dash = '<a:prstDash val="dash"/>' if dashed else ''
@@ -69,7 +70,7 @@ def _line(sid: int, x1: float, y1: float, x2: float, y2: float, *,
         f'<p:spPr><a:xfrm{flip_h}{flip_v}><a:off x="{_n(min(x1,x2))}" y="{_n(min(y1,y2))}"/>'
         f'<a:ext cx="{max(1,_n(abs(x2-x1)))}" cy="{max(1,_n(abs(y2-y1)))}"/></a:xfrm>'
         '<a:prstGeom prst="line"><a:avLst/></a:prstGeom>'
-        '<a:ln w="19050"><a:solidFill><a:srgbClr val="5B6470"/></a:solidFill>'
+        f'<a:ln w="19050"><a:solidFill><a:srgbClr val="{color}"/></a:solidFill>'
         f'{dash}{arrow}</a:ln></p:spPr></p:cxnSp>'
     )
 
@@ -160,7 +161,8 @@ def emit_pptx(diagram: Diagram, out_path: str, *, icon_cache: str | None = None)
     for edge in diagram.edges:
         x1, y1, x2, y2 = edge_endpoints(diagram, layout, edge)
         shapes.append(_line(sid, x1, y1+36, x2, y2+36,
-                            directed=edge.directed, dashed=edge.kind == "data"))
+                            directed=edge.directed, dashed=edge.kind == "data" or edge.dashed,
+                            color=_color(edge.color or "#5B6470")))
         sid += 1
         if edge.label:
             shapes.append(_shape(sid, f"Edge label {sid}", (x1+x2)/2-38, (y1+y2)/2+27,
@@ -171,8 +173,11 @@ def emit_pptx(diagram: Diagram, out_path: str, *, icon_cache: str | None = None)
     for node in diagram.nodes:
         box = layout.boxes[node.id]
         if node.kind != "service":
+            style = SHAPES[node.shape] if node.shape else None
             shapes.append(_shape(sid, f"Node {node.id}", box.x, box.y+36, box.w, box.h,
-                                 geom=geom[node.kind], fill="F1F5F9", line="486581",
+                                 geom=style.pptx if style else geom[node.kind],
+                                 fill=style.fill if style else "F1F5F9",
+                                 line=style.stroke if style else "486581",
                                  text=node.display_label))
             sid += 1
             continue
