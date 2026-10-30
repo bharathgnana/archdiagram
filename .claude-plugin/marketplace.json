@@ -1,5 +1,6 @@
 {
   "name": "archdiagram-marketplace",
+  "description": "Editable diagrams for cloud architecture and business workflows.",
   "owner": {"name": "Bharath Adapa"},
   "plugins": [
     {"name": "archdiagram", "source": "./"}

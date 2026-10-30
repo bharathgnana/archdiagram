@@ -2,6 +2,7 @@
   "name": "archdiagram",
   "version": "0.2.0",
   "description": "Generate architecture, process, decision, and data flow diagrams from JSON specs.",
+  "author": {"name": "Bharath Adapa"},
   "mcpServers": {
     "archdiagram": {
       "command": "python",
