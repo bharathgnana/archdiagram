@@ -151,6 +151,86 @@ def _compute_layers(diagram: Diagram) -> dict[str, int]:
     return {node_id: depths[component[node_id]] for node_id in ids}
 
 
+def _compute_forward_layers(diagram: Diagram) -> dict[str, int]:
+    """Drop DFS back edges, then rank the remaining DAG by longest path."""
+    ids = [node.id for node in diagram.nodes]
+    adjacency = {node_id: [] for node_id in ids}
+    for edge in diagram.edges:
+        if edge.directed:
+            adjacency[edge.source].append(edge.target)
+    forward = {node_id: [] for node_id in ids}
+    state = {node_id: 0 for node_id in ids}
+    for start in ids:
+        if state[start]:
+            continue
+        state[start] = 1
+        stack = [(start, iter(adjacency[start]))]
+        while stack:
+            source, children = stack[-1]
+            try:
+                target = next(children)
+            except StopIteration:
+                state[source] = 2
+                stack.pop()
+                continue
+            if state[target] == 1:
+                continue
+            forward[source].append(target)
+            if state[target] == 0:
+                state[target] = 1
+                stack.append((target, iter(adjacency[target])))
+    indegree = {node_id: 0 for node_id in ids}
+    for targets in forward.values():
+        for target in targets:
+            indegree[target] += 1
+    queue = deque(node_id for node_id in ids if indegree[node_id] == 0)
+    depths = {node_id: 0 for node_id in ids}
+    while queue:
+        source = queue.popleft()
+        for target in forward[source]:
+            depths[target] = max(depths[target], depths[source] + 1)
+            indegree[target] -= 1
+            if indegree[target] == 0:
+                queue.append(target)
+    return depths
+
+
+def _separate_groups(diagram: Diagram, boxes: dict[str, Box],
+                     group_boxes: dict[str, GroupBox], horizontal: bool) -> None:
+    """Move later unpinned groups across the flow until padded boxes clear."""
+    if len(group_boxes) < 2:
+        return
+    members = {group.id: [node for node in diagram.nodes if node.group == group.id]
+               for group in diagram.groups}
+    for _ in range(len(group_boxes) * len(group_boxes)):
+        ordered = sorted(group_boxes.values(), key=lambda box: box.y if horizontal else box.x)
+        moved = False
+        for index, first in enumerate(ordered):
+            for second in ordered[index + 1:]:
+                if horizontal:
+                    flow_overlap = first.x < second.x + second.w and second.x < first.x + first.w
+                    delta = first.y + first.h + GROUP_PAD - second.y
+                    pinned = any(node.y is not None for node in members[second.group_id])
+                else:
+                    flow_overlap = first.y < second.y + second.h and second.y < first.y + first.h
+                    delta = first.x + first.w + GROUP_PAD - second.x
+                    pinned = any(node.x is not None for node in members[second.group_id])
+                if not flow_overlap or delta <= 0 or pinned:
+                    continue
+                for node in members[second.group_id]:
+                    if horizontal:
+                        boxes[node.id].y += delta
+                    else:
+                        boxes[node.id].x += delta
+                if horizontal:
+                    second.y += delta
+                else:
+                    second.x += delta
+                moved = True
+        if not moved:
+            return
+
+
 def _order_within_layer(node_ids: list[str], diagram: Diagram) -> list[str]:
     """Keep group members adjacent while preserving stable insertion order."""
 
@@ -169,7 +249,7 @@ def _layout_shaped(diagram: Diagram) -> LayoutResult:
     """Size explicit shapes individually, leaving the legacy grid untouched."""
     horizontal = diagram.direction in ("LR", "RL")
     reverse = diagram.direction in ("RL", "BT")
-    layers = _compute_layers(diagram)
+    layers = _compute_forward_layers(diagram)
     for node in diagram.nodes:
         if node.tier is not None:
             layers[node.id] = node.tier
@@ -204,6 +284,7 @@ def _layout_shaped(diagram: Diagram) -> LayoutResult:
         if node.y is not None:
             box.y = node.y
     group_boxes = _compute_group_boxes(diagram, boxes)
+    _separate_groups(diagram, boxes, group_boxes, horizontal)
     _normalize_origin(boxes, group_boxes, {})
     width = max([MARGIN] + [box.x + box.w for box in boxes.values()] +
                 [box.x + box.w for box in group_boxes.values()]) + MARGIN
