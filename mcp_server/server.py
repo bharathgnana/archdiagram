@@ -3,10 +3,19 @@
 from __future__ import annotations
 
 from .tools import (
+    catalog_resource,
     choose_template,
+    describe_architecture,
+    describe_diagram,
+    generate_diagram,
+    get_catalog_info,
     get_diagram_template,
     list_catalog,
+    list_icons,
+    list_templates,
     render_diagram,
+    resolve_service,
+    schema_resource,
     search_catalog,
     validate_spec,
 )
@@ -28,8 +37,18 @@ for tool in (
     list_catalog,
     choose_template,
     get_diagram_template,
+    list_templates,
+    list_icons,
+    resolve_service,
+    get_catalog_info,
+    generate_diagram,
 ):
     mcp.tool()(tool)
+
+mcp.resource("archdiag://schema")(schema_resource)
+mcp.resource("archdiag://catalog")(catalog_resource)
+mcp.prompt()(describe_diagram)
+mcp.prompt()(describe_architecture)
 
 
 def main() -> None:

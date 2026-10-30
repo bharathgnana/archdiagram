@@ -147,7 +147,8 @@ def _load_vendor_file(path: str) -> tuple[str, str, dict[str, ServiceEntry]]:
 
 def _manifest_path() -> str:
     repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-    return os.environ.get("ARCHDIAGRAM_CATALOG", os.path.join(repo_root, "catalog", "manifest.json"))
+    return (os.environ.get("ARCHDIAG_MANIFEST") or os.environ.get("ARCHDIAGRAM_CATALOG")
+            or os.path.join(repo_root, "catalog", "manifest.json"))
 
 
 def _load_manifest(path: str, accents: dict[str, str]) -> dict[str, ServiceEntry]:
