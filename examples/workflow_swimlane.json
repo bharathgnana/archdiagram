@@ -1,0 +1,22 @@
+{
+  "title": "Order approval",
+  "direction": "LR",
+  "lanes": [
+    {"id": "customer", "label": "Customer"},
+    {"id": "operations", "label": "Operations"}
+  ],
+  "nodes": [
+    {"id": "start", "kind": "start", "label": "Start", "lane": "customer"},
+    {"id": "submit", "kind": "process", "label": "Submit order", "lane": "customer"},
+    {"id": "review", "kind": "decision", "label": "Approved?", "lane": "operations"},
+    {"id": "record", "kind": "data", "label": "Record order", "lane": "operations"},
+    {"id": "end", "kind": "end", "label": "Done", "lane": "customer"}
+  ],
+  "edges": [
+    {"source": "start", "target": "submit"},
+    {"source": "submit", "target": "review"},
+    {"source": "review", "target": "record", "label": "Yes"},
+    {"source": "record", "target": "end", "kind": "data", "label": "Confirmation"},
+    {"source": "review", "target": "submit", "label": "Revise"}
+  ]
+}

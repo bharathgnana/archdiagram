@@ -11,10 +11,11 @@ Pure stdlib: builds an SVG string by hand.
 from __future__ import annotations
 
 import base64
+import math
 
 from ..layout.engine import ICON_SIZE, Box, LayoutResult
 from ..registry.catalog import Catalog
-from ..spec.model import Diagram
+from ..spec.model import Diagram, Edge
 
 _FONT = "Segoe UI, Helvetica, Arial, sans-serif"
 
@@ -46,7 +47,7 @@ def _lighten(hex_color: str, amount: float = 0.88) -> str:
     return f"#{r:02X}{g:02X}{b:02X}"
 
 
-def _border_point(box: Box, tx: float, ty: float) -> tuple[float, float]:
+def _border_point(box: Box, tx: float, ty: float, kind: str = "process") -> tuple[float, float]:
     """Point on ``box``'s border along the ray toward (tx, ty)."""
 
     cx, cy = box.cx, box.y + box.h / 2
@@ -54,10 +55,39 @@ def _border_point(box: Box, tx: float, ty: float) -> tuple[float, float]:
     if dx == 0 and dy == 0:
         return cx, cy
     half_w, half_h = box.w / 2, box.h / 2
-    scale_x = half_w / abs(dx) if dx != 0 else float("inf")
-    scale_y = half_h / abs(dy) if dy != 0 else float("inf")
-    scale = min(scale_x, scale_y)
+    if kind == "decision":
+        scale = 1 / (abs(dx) / half_w + abs(dy) / half_h)
+    elif kind in ("start", "end"):
+        scale = 1 / math.sqrt((dx / half_w) ** 2 + (dy / half_h) ** 2)
+    else:
+        scale_x = half_w / abs(dx) if dx != 0 else float("inf")
+        scale_y = half_h / abs(dy) if dy != 0 else float("inf")
+        scale = min(scale_x, scale_y)
     return cx + dx * scale, cy + dy * scale
+
+
+def edge_endpoints(diagram: Diagram, layout: LayoutResult, edge: Edge) -> tuple[float, float, float, float]:
+    """Anchor a connector to its actual shapes; separate reciprocal flows."""
+
+    src = layout.boxes[edge.source]
+    dst = layout.boxes[edge.target]
+    source_y = src.y + src.h / 2
+    target_y = dst.y + dst.h / 2
+    offset_x = offset_y = 0.0
+    if edge.source != edge.target and any(
+        other.source == edge.target and other.target == edge.source for other in diagram.edges
+    ):
+        dx, dy = dst.cx - src.cx, target_y - source_y
+        length = math.hypot(dx, dy)
+        if length:
+            offset_x, offset_y = -dy / length * 72, dx / length * 72
+    x1, y1 = _border_point(
+        src, dst.cx + offset_x, target_y + offset_y, diagram.node_by_id(edge.source).kind
+    )
+    x2, y2 = _border_point(
+        dst, src.cx + offset_x, source_y + offset_y, diagram.node_by_id(edge.target).kind
+    )
+    return x1, y1, x2, y2
 
 
 def build_page_svg(
@@ -65,8 +95,10 @@ def build_page_svg(
     layout: LayoutResult,
     catalog: Catalog,
     icon_pngs: dict[str, bytes] | None = None,
+    icon_uris: dict[str, str] | None = None,
 ) -> str:
     icon_pngs = icon_pngs or {}
+    icon_uris = icon_uris or {}
     title_band = 36
     width = layout.width
     height = layout.height + title_band
@@ -93,6 +125,20 @@ def build_page_svg(
 
     dy = title_band  # shift all content below the title band
 
+    # Swim lanes are the backmost containers.
+    for lane in diagram.lanes:
+        lb = layout.lane_boxes.get(lane.id)
+        if lb is None:
+            continue
+        parts.append(
+            f'<rect x="{lb.x:.1f}" y="{lb.y + dy:.1f}" width="{lb.w:.1f}" height="{lb.h:.1f}" '
+            f'rx="6" fill="#F7F9FC" stroke="#BCC7D4" stroke-width="1.5"/>'
+        )
+        parts.append(
+            f'<text x="{lb.x + 12:.1f}" y="{lb.y + dy + 19:.1f}" font-family="{_FONT}" '
+            f'font-size="12" font-weight="600" fill="#35465A">{_esc(lane.display_label)}</text>'
+        )
+
     # Group containers (drawn first, behind nodes/edges).
     for group in diagram.groups:
         gb = layout.group_boxes.get(group.id)
@@ -115,12 +161,12 @@ def build_page_svg(
         dst = layout.boxes.get(edge.target)
         if not src or not dst:
             continue
-        x1, y1 = _border_point(src, dst.cx, dst.y + dst.h / 2)
-        x2, y2 = _border_point(dst, src.cx, src.y + src.h / 2)
+        x1, y1, x2, y2 = edge_endpoints(diagram, layout, edge)
         marker = ' marker-end="url(#arrow)"' if edge.directed else ""
+        dash = ' stroke-dasharray="6 4"' if edge.kind == "data" else ""
         parts.append(
             f'<line x1="{x1:.1f}" y1="{y1 + dy:.1f}" x2="{x2:.1f}" y2="{y2 + dy:.1f}" '
-            f'stroke="#5B6470" stroke-width="1.5"{marker}/>'
+            f'stroke="#5B6470" stroke-width="1.5"{dash}{marker}/>'
         )
         if edge.label:
             mx, my = (x1 + x2) / 2, (y1 + y2) / 2 + dy
@@ -139,13 +185,32 @@ def build_page_svg(
         box = layout.boxes.get(node.id)
         if box is None:
             continue
+        if node.kind != "service":
+            x, y, w, h = box.x, box.y + dy, box.w, box.h
+            if node.kind == "decision":
+                shape = f'<polygon points="{x+w/2:.1f},{y:.1f} {x+w:.1f},{y+h/2:.1f} {x+w/2:.1f},{y+h:.1f} {x:.1f},{y+h/2:.1f}"'
+            elif node.kind == "data":
+                shape = f'<polygon points="{x+18:.1f},{y:.1f} {x+w:.1f},{y:.1f} {x+w-18:.1f},{y+h:.1f} {x:.1f},{y+h:.1f}"'
+            elif node.kind in ("start", "end"):
+                shape = f'<ellipse cx="{x+w/2:.1f}" cy="{y+h/2:.1f}" rx="{w/2:.1f}" ry="{h/2:.1f}"'
+            else:
+                shape = f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" rx="12"'
+            fill = "#EAF4FF" if node.kind == "data" else "#F1F5F9"
+            parts.append(f'{shape} fill="{fill}" stroke="#486581" stroke-width="1.5"/>')
+            parts.append(
+                f'<text x="{box.cx:.1f}" y="{y + h/2 + 4:.1f}" text-anchor="middle" '
+                f'font-family="{_FONT}" font-size="12" fill="#1B1F24">'
+                f'{_esc(_truncate(node.display_label, 18 if node.kind == "decision" else 22))}</text>'
+            )
+            continue
         entry = catalog.lookup(node.service)
         accent = entry.accent if entry else catalog.accent(node.vendor)
         ix, iy, iw, ih = box.icon_rect(ICON_SIZE, ICON_SIZE)
         iy += dy
         png = icon_pngs.get(node.id)
-        if png is not None:
-            href = "data:image/png;base64," + base64.b64encode(png).decode("ascii")
+        href = icon_uris.get(node.id)
+        if png is not None or href is not None:
+            href = href or ("data:image/png;base64," + base64.b64encode(png).decode("ascii"))
             parts.append(
                 f'<image x="{ix:.1f}" y="{iy:.1f}" width="{iw:.1f}" height="{ih:.1f}" '
                 f'href="{href}" preserveAspectRatio="xMidYMid meet"/>'

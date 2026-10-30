@@ -1,23 +1,23 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "archdiagram"
 version = "0.1.0"
-description = "Turn an architecture spec into editable diagrams using official vendor service icons (.pdf, .drawio, .vsdx)."
+description = "Turn cloud architecture and workflow specs into editable diagrams with vendor icons, swim lanes, and multiple exports."
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "MIT" }
+license = "MIT"
 authors = [{ name = "Bharath Adapa" }]
-keywords = ["architecture", "diagram", "drawio", "vsdx", "pdf", "aws", "azure", "gcp", "kubernetes", "lucidchart"]
+keywords = ["architecture", "workflow", "swimlane", "diagram", "drawio", "vsdx", "pdf", "svg", "pptx", "aws", "azure", "gcp", "kubernetes", "lucidchart"]
 
 # Core has ZERO third-party Python dependencies (stdlib only).
 dependencies = []
 
 [project.optional-dependencies]
 # The MCP server subpackage is the ONLY place the mcp SDK is used.
-mcp = ["mcp>=1.2.0"]
+mcp = ["mcp>=1.2.0,<2"]
 
 [project.scripts]
 archdiagram = "archdiagram.cli:main"
@@ -28,6 +28,7 @@ packages = [
     "archdiagram.spec",
     "archdiagram.layout",
     "archdiagram.registry",
+    "archdiagram.registry.catalog_data",
     "archdiagram.emit",
     "archdiagram.rasterize",
     "mcp_server",

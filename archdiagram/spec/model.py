@@ -11,31 +11,36 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 VALID_DIRECTIONS = ("LR", "TB", "RL", "BT")
+VALID_NODE_KINDS = ("service", "process", "decision", "data", "start", "end")
+VALID_EDGE_KINDS = ("flow", "data")
 
 
 @dataclass
 class Node:
-    """A single service node.
+    """A service icon or workflow shape.
 
-    ``service`` is ``"<vendor>.<service_key>"`` (e.g. ``"azure.app_service"``).
+    For service nodes, ``service`` is ``"<vendor>.<service_key>"``
+    (e.g. ``"azure.app_service"``). Other kinds omit it.
     ``x``/``y`` are optional explicit coordinates (top-left, in points) that
     override the computed layout position.
     """
 
     id: str
-    service: str
+    service: str | None = None
     label: str | None = None
     group: str | None = None
+    kind: str = "service"
+    lane: str | None = None
     x: float | None = None
     y: float | None = None
 
     @property
     def vendor(self) -> str:
-        return self.service.split(".", 1)[0]
+        return self.service.split(".", 1)[0] if self.service else ""
 
     @property
     def service_key(self) -> str:
-        parts = self.service.split(".", 1)
+        parts = self.service.split(".", 1) if self.service else []
         return parts[1] if len(parts) == 2 else ""
 
     @property
@@ -51,6 +56,19 @@ class Edge:
     target: str
     label: str | None = None
     directed: bool = True
+    kind: str = "flow"
+
+
+@dataclass
+class Lane:
+    """A named swim lane. Nodes refer to it through ``Node.lane``."""
+
+    id: str
+    label: str | None = None
+
+    @property
+    def display_label(self) -> str:
+        return self.label or self.id
 
 
 @dataclass
@@ -80,6 +98,7 @@ class Diagram:
     nodes: list[Node] = field(default_factory=list)
     edges: list[Edge] = field(default_factory=list)
     groups: list[Group] = field(default_factory=list)
+    lanes: list[Lane] = field(default_factory=list)
 
     def node_by_id(self, node_id: str) -> Node | None:
         for node in self.nodes:

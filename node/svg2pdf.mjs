@@ -54,7 +54,13 @@ try {
   const doc = new PDFDocument({
     size: [width, height],
     margin: 0,
-    info: { Title: payload.title || "Architecture" },
+    // PDFKit derives the document ID from CreationDate. Pin it so a diagram
+    // rendered twice has the same bytes, including its trailer and metadata.
+    info: {
+      Title: payload.title || "Architecture",
+      CreationDate: new Date("2000-01-01T00:00:00Z"),
+      ModDate: new Date("2000-01-01T00:00:00Z"),
+    },
   });
   const stream = createWriteStream(out);
   const done = new Promise((resolve, reject) => {

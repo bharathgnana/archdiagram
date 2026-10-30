@@ -11,7 +11,7 @@ import json
 import os
 from typing import Any
 
-from .model import VALID_DIRECTIONS, Diagram, Edge, Group, Node
+from .model import VALID_DIRECTIONS, VALID_EDGE_KINDS, VALID_NODE_KINDS, Diagram, Edge, Group, Lane, Node
 
 
 class SpecError(Exception):
@@ -60,11 +60,19 @@ def _validate_node(raw: Any, path: str, col: _Collector) -> Node | None:
         col.add(f"{path}.id", "must not be empty")
         ok = False
 
-    service = raw.get("service")
-    if not col.require_type(f"{path}.service", service, (str,), "string"):
+    kind = raw.get("kind", "service")
+    if not isinstance(kind, str) or kind not in VALID_NODE_KINDS:
+        col.add(f"{path}.kind", f"must be one of {', '.join(VALID_NODE_KINDS)}")
         ok = False
-    elif "." not in service or not service.split(".", 1)[1]:
-        col.add(f"{path}.service", "must be '<vendor>.<service_key>' (e.g. 'azure.app_service')")
+    service = raw.get("service")
+    if kind == "service":
+        if not col.require_type(f"{path}.service", service, (str,), "string"):
+            ok = False
+        elif "." not in service or not all(service.split(".", 1)):
+            col.add(f"{path}.service", "must be '<vendor>.<service_key>' (e.g. 'azure.app_service')")
+            ok = False
+    elif service is not None:
+        col.add(f"{path}.service", "only service nodes may specify a service")
         ok = False
 
     label = raw.get("label")
@@ -75,6 +83,10 @@ def _validate_node(raw: Any, path: str, col: _Collector) -> Node | None:
     if group is not None and not col.require_type(f"{path}.group", group, (str,), "string"):
         ok = False
 
+    lane = raw.get("lane")
+    if lane is not None and not col.require_type(f"{path}.lane", lane, (str,), "string"):
+        ok = False
+
     x = raw.get("x")
     if x is not None and not col.require_type(f"{path}.x", x, (int, float), "number"):
         ok = False
@@ -82,7 +94,7 @@ def _validate_node(raw: Any, path: str, col: _Collector) -> Node | None:
     if y is not None and not col.require_type(f"{path}.y", y, (int, float), "number"):
         ok = False
 
-    _warn_unknown_keys(raw, {"id", "service", "label", "group", "x", "y"}, path, col)
+    _warn_unknown_keys(raw, {"id", "service", "label", "group", "kind", "lane", "x", "y"}, path, col)
 
     if not ok:
         return None
@@ -91,6 +103,8 @@ def _validate_node(raw: Any, path: str, col: _Collector) -> Node | None:
         service=service,
         label=label,
         group=group,
+        kind=kind,
+        lane=lane,
         x=float(x) if x is not None else None,
         y=float(y) if y is not None else None,
     )
@@ -117,11 +131,32 @@ def _validate_edge(raw: Any, path: str, col: _Collector) -> Edge | None:
     if not col.require_type(f"{path}.directed", directed, (bool,), "boolean"):
         ok = False
 
-    _warn_unknown_keys(raw, {"source", "target", "label", "directed"}, path, col)
+    kind = raw.get("kind", "flow")
+    if not isinstance(kind, str) or kind not in VALID_EDGE_KINDS:
+        col.add(f"{path}.kind", f"must be one of {', '.join(VALID_EDGE_KINDS)}")
+        ok = False
+
+    _warn_unknown_keys(raw, {"source", "target", "label", "directed", "kind"}, path, col)
 
     if not ok:
         return None
-    return Edge(source=source, target=target, label=label, directed=bool(directed))
+    return Edge(source=source, target=target, label=label, directed=bool(directed), kind=kind)
+
+
+def _validate_lane(raw: Any, path: str, col: _Collector) -> Lane | None:
+    if not isinstance(raw, dict):
+        col.add(path, f"expected object, got {type(raw).__name__}")
+        return None
+    lane_id = raw.get("id")
+    if not isinstance(lane_id, str) or not lane_id.strip():
+        col.add(f"{path}.id", "must be a nonempty string")
+    label = raw.get("label")
+    if label is not None and not isinstance(label, str):
+        col.add(f"{path}.label", "expected string")
+    _warn_unknown_keys(raw, {"id", "label"}, path, col)
+    if not isinstance(lane_id, str) or not lane_id.strip() or (label is not None and not isinstance(label, str)):
+        return None
+    return Lane(id=lane_id, label=label)
 
 
 def _validate_group(raw: Any, path: str, col: _Collector) -> Group | None:
@@ -212,19 +247,29 @@ def validate_spec(raw: Any) -> Diagram:
             if edge is not None:
                 edges.append(edge)
 
-    _warn_unknown_keys(raw, {"title", "direction", "nodes", "edges", "groups"}, "<root>", col)
+    raw_lanes = raw.get("lanes", [])
+    lanes: list[Lane] = []
+    if not isinstance(raw_lanes, list):
+        col.add("lanes", f"expected array, got {type(raw_lanes).__name__}")
+    else:
+        for i, raw_lane in enumerate(raw_lanes):
+            lane = _validate_lane(raw_lane, f"lanes[{i}]", col)
+            if lane is not None:
+                lanes.append(lane)
+
+    _warn_unknown_keys(raw, {"title", "direction", "nodes", "edges", "groups", "lanes"}, "<root>", col)
 
     # Cross-reference checks (only meaningful once individual items parsed).
-    _check_cross_references(nodes, edges, groups, col)
+    _check_cross_references(nodes, edges, groups, lanes, col)
 
     if col.errors:
         raise SpecValidationError(col.errors)
 
-    return Diagram(title=title, direction=direction, nodes=nodes, edges=edges, groups=groups)
+    return Diagram(title=title, direction=direction, nodes=nodes, edges=edges, groups=groups, lanes=lanes)
 
 
 def _check_cross_references(
-    nodes: list[Node], edges: list[Edge], groups: list[Group], col: _Collector
+    nodes: list[Node], edges: list[Edge], groups: list[Group], lanes: list[Lane], col: _Collector
 ) -> None:
     node_ids: set[str] = set()
     for i, node in enumerate(nodes):
@@ -241,6 +286,17 @@ def _check_cross_references(
     for i, node in enumerate(nodes):
         if node.group is not None and node.group not in group_ids:
             col.add(f"nodes[{i}].group", f"references unknown group '{node.group}'")
+
+    lane_ids: set[str] = set()
+    for i, lane in enumerate(lanes):
+        if lane.id in lane_ids:
+            col.add(f"lanes[{i}].id", f"duplicate lane id '{lane.id}'")
+        lane_ids.add(lane.id)
+    for i, node in enumerate(nodes):
+        if node.lane is not None and node.lane not in lane_ids:
+            col.add(f"nodes[{i}].lane", f"references unknown lane '{node.lane}'")
+        elif lanes and node.lane is None:
+            col.add(f"nodes[{i}].lane", "required when lanes are defined")
 
     for i, edge in enumerate(edges):
         if edge.source not in node_ids:

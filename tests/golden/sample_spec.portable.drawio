@@ -1,0 +1,52 @@
+<mxfile host="archdiagram" type="device">
+  <diagram id="page-1" name="Web platform on Azure">
+    <mxGraphModel dx="0" dy="0" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="838" pageHeight="526" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="Web platform on Azure" style="text;html=1;align=center;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="8.0" y="8.0" width="822.0" height="24.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="grp_app" value="Application tier" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;fontSize=12;fontStyle=1;fillColor=#E0EEF9;strokeColor=#0078D4;fontColor=#0078D4;" vertex="1" parent="1">
+          <mxGeometry x="222.0" y="48.0" width="568.0" height="166.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="grp_data" value="Data tier" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;fontSize=12;fontStyle=1;fillColor=#E0EEF9;strokeColor=#0078D4;fontColor=#0078D4;" vertex="1" parent="1">
+          <mxGeometry x="614.0" y="180.0" width="176.0" height="298.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_agw" value="App Gateway" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="90.0" y="108.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_web" value="Web App" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="286.0" y="108.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_aks" value="AKS" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="482.0" y="108.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_kv" value="Key Vault" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="678.0" y="108.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_sql" value="SQL DB" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="678.0" y="240.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_cosmos" value="Cosmos DB" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="678.0" y="372.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_0" value="https" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_agw" target="node_web">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_1" value="api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_web" target="node_aks">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_2" value="secrets" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_aks" target="node_kv">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_aks" target="node_sql">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_aks" target="node_cosmos">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

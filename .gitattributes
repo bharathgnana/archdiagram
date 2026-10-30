@@ -1,0 +1,2 @@
+# Golden snapshots compare exact bytes on Linux and Windows.
+tests/golden/** -text

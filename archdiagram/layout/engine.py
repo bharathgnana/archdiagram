@@ -1,7 +1,7 @@
 """Hand-rolled layered layout (no graphviz, no third-party deps).
 
-Nodes are assigned to layers by a longest-path relaxation over the directed
-edges (cycles are tolerated via a bounded number of passes). Within a layer
+Nodes are assigned to layers by a longest path over the directed
+component graph (cycles share a layer). Within a layer
 nodes are ordered so that members of the same group stay adjacent. Layer axis
 follows the diagram ``direction`` (``LR``/``RL`` horizontal, ``TB``/``BT``
 vertical). Explicit ``x``/``y`` on a node override the computed cell origin.
@@ -12,6 +12,7 @@ All coordinates are in points with the origin at the top-left.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from collections import deque
 
 from ..spec.model import Diagram
 
@@ -23,6 +24,8 @@ V_GAP = 40
 MARGIN = 48
 GROUP_PAD = 22
 GROUP_HEADER = 30
+LANE_PAD = 20
+LANE_HEADER = 28
 
 
 @dataclass
@@ -62,28 +65,89 @@ class GroupBox:
 
 
 @dataclass
+class LaneBox:
+    lane_id: str
+    x: float
+    y: float
+    w: float
+    h: float
+
+
+@dataclass
 class LayoutResult:
     boxes: dict[str, Box]
     group_boxes: dict[str, GroupBox] = field(default_factory=dict)
+    lane_boxes: dict[str, LaneBox] = field(default_factory=dict)
     width: float = 0.0
     height: float = 0.0
 
 
 def _compute_layers(diagram: Diagram) -> dict[str, int]:
-    """Longest-path layering with bounded relaxation (cycle-safe)."""
+    """Collapse cycles, then assign longest-path layers to the acyclic graph."""
 
-    layer = {node.id: 0 for node in diagram.nodes}
-    edges = [(e.source, e.target) for e in diagram.edges if e.directed]
-    n = len(diagram.nodes)
-    for _ in range(max(1, n)):
-        changed = False
-        for src, dst in edges:
-            if src in layer and dst in layer and layer[dst] < layer[src] + 1:
-                layer[dst] = layer[src] + 1
-                changed = True
-        if not changed:
-            break
-    return layer
+    ids = [node.id for node in diagram.nodes]
+    adjacent = {node_id: [] for node_id in ids}
+    reverse = {node_id: [] for node_id in ids}
+    for edge in diagram.edges:
+        if edge.directed:
+            adjacent[edge.source].append(edge.target)
+            reverse[edge.target].append(edge.source)
+
+    # Iterative Kosaraju avoids recursion limits on large workflow specs.
+    seen: set[str] = set()
+    order: list[str] = []
+    for start in ids:
+        if start in seen:
+            continue
+        seen.add(start)
+        stack = [(start, iter(adjacent[start]))]
+        while stack:
+            node_id, children = stack[-1]
+            try:
+                target = next(children)
+            except StopIteration:
+                order.append(node_id)
+                stack.pop()
+                continue
+            if target not in seen:
+                seen.add(target)
+                stack.append((target, iter(adjacent[target])))
+
+    component: dict[str, int] = {}
+    component_count = 0
+    for start in reversed(order):
+        if start in component:
+            continue
+        index = component_count
+        component_count += 1
+        component[start] = index
+        stack = [start]
+        while stack:
+            node_id = stack.pop()
+            for source in reverse[node_id]:
+                if source not in component:
+                    component[source] = index
+                    stack.append(source)
+
+    count = max(component.values(), default=-1) + 1
+    graph = [set() for _ in range(count)]
+    indegree = [0] * count
+    for source, targets in adjacent.items():
+        for target in targets:
+            a, b = component[source], component[target]
+            if a != b and b not in graph[a]:
+                graph[a].add(b)
+                indegree[b] += 1
+    depths = [0] * count
+    queue = deque(i for i, degree in enumerate(indegree) if degree == 0)
+    while queue:
+        source = queue.popleft()
+        for target in sorted(graph[source]):
+            depths[target] = max(depths[target], depths[source] + 1)
+            indegree[target] -= 1
+            if indegree[target] == 0:
+                queue.append(target)
+    return {node_id: depths[component[node_id]] for node_id in ids}
 
 
 def _order_within_layer(node_ids: list[str], diagram: Diagram) -> list[str]:
@@ -112,17 +176,55 @@ def layout_diagram(diagram: Diagram) -> LayoutResult:
         by_layer.setdefault(layers[node.id], []).append(node.id)
 
     boxes: dict[str, Box] = {}
-    for layer_idx in range(max_layer + 1):
-        members = _order_within_layer(by_layer.get(layer_idx, []), diagram)
-        place_idx = (max_layer - layer_idx) if reverse else layer_idx
-        for slot, node_id in enumerate(members):
+    lane_boxes: dict[str, LaneBox] = {}
+    if diagram.lanes:
+        counts = {
+            lane.id: max(
+                (sum(n.lane == lane.id for n in diagram.nodes if layers[n.id] == layer)
+                 for layer in range(max_layer + 1)), default=0
+            )
+            for lane in diagram.lanes
+        }
+        cursor = MARGIN
+        for lane in diagram.lanes:
+            slots = max(1, counts[lane.id])
             if horizontal:
-                x = MARGIN + place_idx * (NODE_W + H_GAP)
-                y = MARGIN + slot * (NODE_H + V_GAP)
+                band = LANE_HEADER + 2 * LANE_PAD + slots * NODE_H + (slots - 1) * V_GAP
+                span = 2 * LANE_PAD + (max_layer + 1) * NODE_W + max_layer * H_GAP
+                lane_boxes[lane.id] = LaneBox(lane.id, MARGIN, cursor, span, band)
             else:
-                x = MARGIN + slot * (NODE_W + H_GAP)
-                y = MARGIN + place_idx * (NODE_H + V_GAP)
-            boxes[node_id] = Box(node_id=node_id, x=float(x), y=float(y))
+                band = 2 * LANE_PAD + slots * NODE_W + (slots - 1) * H_GAP
+                span = LANE_HEADER + 2 * LANE_PAD + (max_layer + 1) * NODE_H + max_layer * V_GAP
+                lane_boxes[lane.id] = LaneBox(lane.id, cursor, MARGIN, band, span)
+            cursor += band + LANE_PAD
+        occupied: dict[tuple[int, str], int] = {}
+        for layer_idx in range(max_layer + 1):
+            members = _order_within_layer(by_layer.get(layer_idx, []), diagram)
+            place_idx = (max_layer - layer_idx) if reverse else layer_idx
+            for node_id in members:
+                lane_id = diagram.node_by_id(node_id).lane
+                lb = lane_boxes[lane_id]
+                slot = occupied.get((layer_idx, lane_id), 0)
+                occupied[(layer_idx, lane_id)] = slot + 1
+                if horizontal:
+                    x = lb.x + LANE_PAD + place_idx * (NODE_W + H_GAP)
+                    y = lb.y + LANE_HEADER + LANE_PAD + slot * (NODE_H + V_GAP)
+                else:
+                    x = lb.x + LANE_PAD + slot * (NODE_W + H_GAP)
+                    y = lb.y + LANE_HEADER + LANE_PAD + place_idx * (NODE_H + V_GAP)
+                boxes[node_id] = Box(node_id, float(x), float(y))
+    else:
+        for layer_idx in range(max_layer + 1):
+            members = _order_within_layer(by_layer.get(layer_idx, []), diagram)
+            place_idx = (max_layer - layer_idx) if reverse else layer_idx
+            for slot, node_id in enumerate(members):
+                if horizontal:
+                    x = MARGIN + place_idx * (NODE_W + H_GAP)
+                    y = MARGIN + slot * (NODE_H + V_GAP)
+                else:
+                    x = MARGIN + slot * (NODE_W + H_GAP)
+                    y = MARGIN + place_idx * (NODE_H + V_GAP)
+                boxes[node_id] = Box(node_id=node_id, x=float(x), y=float(y))
 
     # Explicit coordinate overrides.
     for node in diagram.nodes:
@@ -135,7 +237,7 @@ def layout_diagram(diagram: Diagram) -> LayoutResult:
 
     group_boxes = _compute_group_boxes(diagram, boxes)
 
-    _normalize_origin(boxes, group_boxes)
+    _normalize_origin(boxes, group_boxes, lane_boxes)
 
     width = MARGIN
     height = MARGIN
@@ -145,17 +247,20 @@ def layout_diagram(diagram: Diagram) -> LayoutResult:
     for gb in group_boxes.values():
         width = max(width, gb.x + gb.w)
         height = max(height, gb.y + gb.h)
+    for lb in lane_boxes.values():
+        width = max(width, lb.x + lb.w)
+        height = max(height, lb.y + lb.h)
     width += MARGIN
     height += MARGIN
 
-    return LayoutResult(boxes=boxes, group_boxes=group_boxes, width=width, height=height)
+    return LayoutResult(boxes=boxes, group_boxes=group_boxes, lane_boxes=lane_boxes, width=width, height=height)
 
 
-def _normalize_origin(boxes: dict[str, Box], group_boxes: dict[str, GroupBox]) -> None:
+def _normalize_origin(boxes: dict[str, Box], group_boxes: dict[str, GroupBox], lane_boxes: dict[str, LaneBox]) -> None:
     """Shift everything so the top-left content edge sits at MARGIN, MARGIN."""
 
-    xs = [b.x for b in boxes.values()] + [g.x for g in group_boxes.values()]
-    ys = [b.y for b in boxes.values()] + [g.y for g in group_boxes.values()]
+    xs = [b.x for b in boxes.values()] + [g.x for g in group_boxes.values()] + [l.x for l in lane_boxes.values()]
+    ys = [b.y for b in boxes.values()] + [g.y for g in group_boxes.values()] + [l.y for l in lane_boxes.values()]
     if not xs or not ys:
         return
     dx = MARGIN - min(xs)
@@ -168,6 +273,9 @@ def _normalize_origin(boxes: dict[str, Box], group_boxes: dict[str, GroupBox]) -
     for g in group_boxes.values():
         g.x += dx
         g.y += dy
+    for lane in lane_boxes.values():
+        lane.x += dx
+        lane.y += dy
 
 
 def _compute_group_boxes(diagram: Diagram, boxes: dict[str, Box]) -> dict[str, GroupBox]:

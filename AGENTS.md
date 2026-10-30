@@ -5,9 +5,11 @@ this repository.
 
 ## What this repo does
 
-`archdiagram` converts a JSON architecture **spec** into an editable diagram
-whose nodes are official vendor service icons (Azure, AWS, GCP, Kubernetes),
-exported as `.pdf`, `.drawio`, or `.vsdx` (all Lucidchart-importable).
+`archdiagram` converts a JSON architecture or workflow **spec** into an editable
+diagram. Service nodes use official vendor icons (Azure, AWS, GCP, Kubernetes);
+workflow nodes use process, decision, data, start, and end shapes. Swim lanes
+show ownership. Exports include `.pdf`, `.drawio`, `.vsdx`, `.svg`, `.html`, and
+editable `.pptx`.
 
 Your job as an agent: translate the user's natural-language architecture into
 the JSON spec, then render it.
@@ -17,7 +19,8 @@ the JSON spec, then render it.
 1. **Skill** - read [skill/SKILL.md](skill/SKILL.md) and follow it. It contains
    the spec schema, catalog lookup, and render commands.
 2. **MCP server** - run `python -m mcp_server.server` and call the tools
-   `validate_spec`, `render_diagram`, `search_catalog`, `list_catalog`. A sample
+`validate_spec`, `render_diagram`, `search_catalog`, `list_catalog`,
+`choose_template`, and `get_diagram_template`. A sample
    client config is in [examples/mcp.json](examples/mcp.json).
 
 ## Quick start
@@ -27,6 +30,8 @@ python -m tools.download_icons            # fetch vendor icons into ./icons
 cd node && npm install && cd ..           # optional: PDF + crisp raster icons
 python -m archdiagram.cli catalog search "kubernetes"
 python -m archdiagram.cli render spec.json -f pdf -o out/arch.pdf
+python -m archdiagram.cli templates list
+python -m archdiagram.cli render examples/workflow_swimlane.json -f pptx -o out/workflow.pptx
 ```
 
 ## Conventions
@@ -63,3 +68,21 @@ convention works in every repo (a user-scope hook activates it automatically).
 - **When you are the Cursor reviewer:** write `suggestions_*.md` with a
   `## Open Directives` list of short, testable `- [ ]` items plus a
   `## Claude Acknowledgements` heading, and reference the bridge file from the plan/spec.
+
+## Agent sync
+
+Claude Code, Codex, Gemini CLI, Cursor, and VS Code Copilot share one skill library. Keep this section identical in every instruction file.
+
+The library is `C:\Users\Bharath\globalskills`, private repo `bharathgnana/globalskills`.
+
+- Personal skills are stored in `globalskills/shared`.
+- Project skills are stored in `globalskills/projects/<project>/`. This repository's `.claude/skills`, `.codex/skills`, `.cursor/skills`, and `.agents/skills` directories point at that tree.
+
+When this guidance changes, update all of these files together:
+
+- `CLAUDE.md` (Claude Code)
+- `AGENTS.md` (Codex)
+- `GEMINI.md` (Gemini CLI)
+- `.github/copilot-instructions.md` (VS Code Copilot)
+
+Save skills only under `globalskills`.

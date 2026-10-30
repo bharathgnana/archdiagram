@@ -13,6 +13,7 @@ a top-left origin, so coordinates are scaled and Y-flipped here.
 from __future__ import annotations
 
 import os
+import math
 import zipfile
 
 from ..layout.engine import ICON_SIZE, layout_diagram
@@ -20,7 +21,8 @@ from ..registry.catalog import get_catalog
 from ..registry.icons import IconResolver
 from ..spec.model import Diagram
 from .iconglyph import node_icon_pngs
-from .svgcanvas import _border_point, _esc, _lighten
+from .svgcanvas import _esc, _lighten, edge_endpoints
+from .ziputil import write_stable
 
 PX_PER_INCH = 96.0
 
@@ -125,6 +127,26 @@ def _rect_geometry(noshow_fill: bool = False) -> str:
     )
 
 
+def _node_geometry(kind: str) -> str:
+    if kind not in ("decision", "data", "start", "end"):
+        return _rect_geometry()
+    if kind == "decision":
+        points = [(0.5, 0), (1, 0.5), (0.5, 1), (0, 0.5), (0.5, 0)]
+    elif kind == "data":
+        points = [(0.15, 0), (1, 0), (0.85, 1), (0, 1), (0.15, 0)]
+    else:
+        points = [
+            (round(0.5 + 0.5 * math.cos(2 * math.pi * i / 16), 4),
+             round(0.5 + 0.5 * math.sin(2 * math.pi * i / 16), 4))
+            for i in range(17)
+        ]
+    rows = []
+    for i, (x, y) in enumerate(points):
+        row_type = "RelMoveTo" if i == 0 else "RelLineTo"
+        rows.append(f'      <Row T="{row_type}" IX="{i+1}"><Cell N="X" V="{x}"/><Cell N="Y" V="{y}"/></Row>')
+    return '    <Section N="Geometry" IX="0">\n' + '\n'.join(rows) + '\n    </Section>\n'
+
+
 def _line_geometry() -> str:
     return (
         '    <Section N="Geometry" IX="0">\n'
@@ -147,6 +169,7 @@ def _rect_shape(
     text: str = "",
     valign_top: bool = False,
     font_color: str = "#1B1F24",
+    kind: str = "process",
 ) -> str:
     pin_x = _in(x + w / 2)
     pin_y = _in(page_h - (y + h / 2))
@@ -176,7 +199,7 @@ def _rect_shape(
         f'    <Shape ID="{shape_id}" Type="Shape">\n'
         + "\n".join(cells)
         + "\n"
-        + _rect_geometry(noshow_fill=fill is None)
+        + (_rect_geometry(noshow_fill=True) if fill is None else _node_geometry(kind))
         + text_xml
         + "    </Shape>\n"
     )
@@ -205,7 +228,8 @@ def _image_shape(
 
 
 def _line_shape(
-    shape_id: int, x1: float, y1: float, x2: float, y2: float, page_h: float, stroke: str
+    shape_id: int, x1: float, y1: float, x2: float, y2: float, page_h: float, stroke: str,
+    *, directed: bool = True, dashed: bool = False,
 ) -> str:
     bx, by = _in(x1), _in(page_h - y1)
     ex, ey = _in(x2), _in(page_h - y2)
@@ -225,7 +249,8 @@ def _line_shape(
         '      <Cell N="LocPinY" V="0"/>\n'
         f'      <Cell N="LineColor" V="{stroke}"/>\n'
         '      <Cell N="LinePattern" V="1"/>\n'
-        '      <Cell N="EndArrow" V="4"/>\n'
+        + ('      <Cell N="EndArrow" V="4"/>\n' if directed else '')
+        + ('      <Cell N="LinePattern" V="2"/>\n' if dashed else '')
         + _line_geometry()
         + "    </Shape>\n"
     )
@@ -254,7 +279,17 @@ def emit_vsdx(
     sid = 1
     rel_counter = 1
 
-    # Group containers first.
+    # Swim lanes and group containers first.
+    for lane in diagram.lanes:
+        lb = layout.lane_boxes.get(lane.id)
+        if lb is not None:
+            shapes.append(_rect_shape(
+                sid, lb.x, lb.y, lb.w, lb.h, page_h,
+                fill="#F7F9FC", stroke="#BCC7D4", text=lane.display_label,
+                valign_top=True,
+            ))
+            sid += 1
+
     for group in diagram.groups:
         gb = layout.group_boxes.get(group.id)
         if gb is None:
@@ -273,6 +308,14 @@ def emit_vsdx(
     for node in diagram.nodes:
         box = layout.boxes.get(node.id)
         if box is None:
+            continue
+        if node.kind != "service":
+            shapes.append(_rect_shape(
+                sid, box.x, box.y, box.w, box.h, page_h,
+                fill="#F1F5F9", stroke="#486581", text=node.display_label,
+                kind=node.kind,
+            ))
+            sid += 1
             continue
         entry = catalog.lookup(node.service)
         accent = entry.accent if entry else catalog.accent(node.vendor)
@@ -311,10 +354,18 @@ def emit_vsdx(
         dst = layout.boxes.get(edge.target)
         if not src or not dst:
             continue
-        x1, y1 = _border_point(src, dst.cx, dst.y + dst.h / 2)
-        x2, y2 = _border_point(dst, src.cx, src.y + src.h / 2)
-        shapes.append(_line_shape(sid, x1, y1, x2, y2, page_h, "#5B6470"))
+        x1, y1, x2, y2 = edge_endpoints(diagram, layout, edge)
+        shapes.append(_line_shape(
+            sid, x1, y1, x2, y2, page_h, "#5B6470",
+            directed=edge.directed, dashed=edge.kind == "data",
+        ))
         sid += 1
+        if edge.label:
+            shapes.append(_rect_shape(
+                sid, (x1+x2)/2 - 44, (y1+y2)/2 - 10, 88, 20, page_h,
+                fill="#FFFFFF", stroke=None, text=edge.label,
+            ))
+            sid += 1
 
     page1 = (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
@@ -333,16 +384,16 @@ def emit_vsdx(
 
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     with zipfile.ZipFile(out_path, "w", zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr("[Content_Types].xml", _content_types(bool(media)))
-        zf.writestr("_rels/.rels", _root_rels())
-        zf.writestr("visio/document.xml", _document_xml())
-        zf.writestr("visio/_rels/document.xml.rels", _document_rels())
-        zf.writestr("visio/pages/pages.xml", _pages_xml(page_w, page_h))
-        zf.writestr("visio/pages/_rels/pages.xml.rels", _pages_rels())
-        zf.writestr("visio/pages/page1.xml", page1)
+        write_stable(zf, "[Content_Types].xml", _content_types(bool(media)))
+        write_stable(zf, "_rels/.rels", _root_rels())
+        write_stable(zf, "visio/document.xml", _document_xml())
+        write_stable(zf, "visio/_rels/document.xml.rels", _document_rels())
+        write_stable(zf, "visio/pages/pages.xml", _pages_xml(page_w, page_h))
+        write_stable(zf, "visio/pages/_rels/pages.xml.rels", _pages_rels())
+        write_stable(zf, "visio/pages/page1.xml", page1)
         if page1_rels:
-            zf.writestr("visio/pages/_rels/page1.xml.rels", page1_rels)
+            write_stable(zf, "visio/pages/_rels/page1.xml.rels", page1_rels)
         for fname, data in media.items():
-            zf.writestr(f"visio/media/{fname}", data)
+            write_stable(zf, f"visio/media/{fname}", data)
 
     return warnings

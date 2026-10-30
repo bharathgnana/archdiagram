@@ -32,6 +32,13 @@ _GROUP_STYLE = (
     "fontSize=12;fontStyle=1;fillColor={fill};strokeColor={accent};fontColor={accent};"
 )
 _EDGE_STYLE = "edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow={arrow};"
+_KIND_SHAPES = {
+    "process": "rounded=1;arcSize=12;",
+    "decision": "rhombus;",
+    "data": "shape=parallelogram;",
+    "start": "ellipse;",
+    "end": "ellipse;",
+}
 
 
 def _attr(value: str) -> str:
@@ -95,6 +102,16 @@ def emit_drawio(diagram: Diagram, mode: str = PORTABLE, *, icon_cache: str | Non
         )
     )
 
+    for lane in diagram.lanes:
+        lb = layout.lane_boxes.get(lane.id)
+        if lb is not None:
+            body.append(_cell(
+                f"lane_{lane.id}", lane.display_label,
+                "rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;"
+                "fontSize=12;fontStyle=1;fillColor=#F7F9FC;strokeColor=#BCC7D4;",
+                lb.x, lb.y, lb.w, lb.h,
+            ))
+
     # Group containers (behind nodes by document order).
     for group in diagram.groups:
         gb = layout.group_boxes.get(group.id)
@@ -109,12 +126,19 @@ def emit_drawio(diagram: Diagram, mode: str = PORTABLE, *, icon_cache: str | Non
         box = layout.boxes.get(node.id)
         if box is None:
             continue
+        if node.kind != "service":
+            style = (
+                _KIND_SHAPES[node.kind] + "whiteSpace=wrap;html=1;align=center;verticalAlign=middle;"
+                "fillColor=#F1F5F9;strokeColor=#486581;fontColor=#1B1F24;fontSize=12;"
+            )
+            body.append(_cell(f"node_{node.id}", node.display_label, style, box.x, box.y, box.w, box.h))
+            continue
         entry = catalog.lookup(node.service)
         ix, iy, iw, ih = box.icon_rect(ICON_SIZE, ICON_SIZE)
 
         if entry is not None and mode == NATIVE and entry.native_style:
             style = entry.native_style
-        elif entry is not None and mode == PORTABLE:
+        elif entry is not None and (mode == PORTABLE or not entry.native_style):
             data_uri = resolver.data_uri(entry.icon)
             if data_uri:
                 style = _portable_style(data_uri)
@@ -131,6 +155,8 @@ def emit_drawio(diagram: Diagram, mode: str = PORTABLE, *, icon_cache: str | Non
         if edge.source not in layout.boxes or edge.target not in layout.boxes:
             continue
         style = _EDGE_STYLE.format(arrow="block" if edge.directed else "none")
+        if edge.kind == "data":
+            style += "dashed=1;dashPattern=6 4;"
         body.append(
             f'        <mxCell id="edge_{i}" value="{_attr(edge.label or "")}" '
             f'style="{_attr(style)}" edge="1" parent="1" '

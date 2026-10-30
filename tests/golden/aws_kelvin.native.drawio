@@ -1,0 +1,73 @@
+<mxfile host="archdiagram" type="device">
+  <diagram id="page-1" name="Kelvin AI on AWS">
+    <mxGraphModel dx="0" dy="0" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="860" pageHeight="922" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="Kelvin AI on AWS" style="text;html=1;align=center;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="8.0" y="8.0" width="844.0" height="24.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="grp_vpc" value="Virtual private cloud (VPC)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;fontSize=12;fontStyle=1;fillColor=#FCEDE0;strokeColor=#ED7100;fontColor=#ED7100;" vertex="1" parent="1">
+          <mxGeometry x="244.0" y="48.0" width="568.0" height="298.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="grp_customer" value="Customer account" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;fontSize=12;fontStyle=1;fillColor=#FCEDE0;strokeColor=#ED7100;fontColor=#ED7100;" vertex="1" parent="1">
+          <mxGeometry x="48.0" y="48.0" width="176.0" height="166.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="grp_integrations" value="Integrations" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;fontSize=12;fontStyle=1;fillColor=#FCEDE0;strokeColor=#ED7100;fontColor=#ED7100;" vertex="1" parent="1">
+          <mxGeometry x="636.0" y="312.0" width="176.0" height="562.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_ec2" value="EC2 Kelvin Nodes" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ec2;" vertex="1" parent="1">
+          <mxGeometry x="112.0" y="108.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_alb" value="App Load Balancer" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#ED7100;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="308.0" y="108.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_eks" value="EKS (Kelvin cluster)" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.elastic_kubernetes_service;" vertex="1" parent="1">
+          <mxGeometry x="504.0" y="108.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_rds" value="Amazon RDS" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#2E27AD;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.rds;" vertex="1" parent="1">
+          <mxGeometry x="700.0" y="108.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_sns" value="Amazon SNS" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.sns;" vertex="1" parent="1">
+          <mxGeometry x="700.0" y="240.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_s3" value="Amazon S3" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#7AA116;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;" vertex="1" parent="1">
+          <mxGeometry x="700.0" y="372.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_sitewise" value="IoT SiteWise" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#ED7100;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="700.0" y="504.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_quicksight" value="QuickSight" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#ED7100;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="700.0" y="636.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_sagemaker" value="SageMaker" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#ED7100;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="700.0" y="768.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_0" value="ingest" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_ec2" target="node_alb">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_alb" target="node_eks">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_eks" target="node_rds">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_eks" target="node_sns">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_eks" target="node_s3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_eks" target="node_sitewise">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_eks" target="node_sagemaker">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_eks" target="node_quicksight">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

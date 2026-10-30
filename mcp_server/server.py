@@ -21,15 +21,19 @@ import os
 
 from archdiagram.emit.drawio import NATIVE, PORTABLE, emit_drawio
 from archdiagram.emit.pdf import PdfDependencyError, emit_pdf
+from archdiagram.emit.pptx import emit_pptx
+from archdiagram.emit.svg import render_html, render_svg
 from archdiagram.emit.vsdx import emit_vsdx
 from archdiagram.registry.catalog import get_catalog
 from archdiagram.spec.validate import SpecError, SpecValidationError, load_spec
+from archdiagram.templates import get_template, list_templates, suggest_template
 
 try:
     from mcp.server.fastmcp import FastMCP
 except ImportError as exc:  # pragma: no cover
     raise SystemExit(
-        "The MCP SDK is not installed. Install it with:\n    pip install \"archdiagram[mcp]\""
+        "A compatible MCP SDK (1.x) is required. Install it with:\n"
+        "    pip install \"archdiagram[mcp]\""
     ) from exc
 
 mcp = FastMCP("archdiagram")
@@ -52,6 +56,7 @@ def validate_spec(spec_json: str) -> dict:
             "nodes": len(diagram.nodes),
             "edges": len(diagram.edges),
             "groups": len(diagram.groups),
+            "lanes": len(diagram.lanes),
         },
     }
 
@@ -68,7 +73,7 @@ def render_diagram(
 
     Args:
         spec_json: the architecture spec as a JSON string.
-        fmt: one of "pdf", "drawio", "vsdx".
+        fmt: one of "pdf", "drawio", "vsdx", "svg", "html", "pptx".
         out_path: absolute or relative path to write.
         drawio_mode: "portable" (embedded icons, best for Lucid) or "native".
         icon_cache: optional icon cache directory override.
@@ -92,8 +97,18 @@ def render_diagram(
                 fh.write(xml)
         elif fmt == "vsdx":
             warnings = emit_vsdx(diagram, out_path, icon_cache=icon_cache)
+        elif fmt == "pptx":
+            warnings = emit_pptx(diagram, out_path, icon_cache=icon_cache)
+        elif fmt in ("svg", "html"):
+            content, warnings = (
+                render_svg(diagram, icon_cache=icon_cache)
+                if fmt == "svg" else render_html(diagram, icon_cache=icon_cache)
+            )
+            os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
+            with open(out_path, "w", encoding="utf-8") as fh:
+                fh.write(content)
         else:
-            return {"ok": False, "errors": [f"unknown format '{fmt}'; use pdf|drawio|vsdx"]}
+            return {"ok": False, "errors": [f"unknown format '{fmt}'; use pdf|drawio|vsdx|svg|html|pptx"]}
     except PdfDependencyError as exc:
         return {"ok": False, "errors": [str(exc)]}
 
@@ -122,6 +137,24 @@ def list_catalog(vendor: str | None = None) -> dict:
             for e in sorted(entries, key=lambda x: x.service)
         ],
     }
+
+
+@mcp.tool()
+def choose_template(description: str) -> dict:
+    """Recommend a cloud, workflow, decision, dataflow, or swimlane starter spec."""
+
+    name = suggest_template(description)
+    return {"name": name, "spec": get_template(name), "templates": list_templates()}
+
+
+@mcp.tool()
+def get_diagram_template(name: str) -> dict:
+    """Get an editable starter spec by name. Use choose_template to select one."""
+
+    try:
+        return {"ok": True, "spec": get_template(name)}
+    except ValueError as exc:
+        return {"ok": False, "errors": [str(exc)]}
 
 
 def main() -> None:

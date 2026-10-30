@@ -1,0 +1,49 @@
+<mxfile host="archdiagram" type="device">
+  <diagram id="page-1" name="Order approval">
+    <mxGraphModel dx="0" dy="0" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="856" pageHeight="436" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="Order approval" style="text;html=1;align=center;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="8.0" y="8.0" width="840.0" height="24.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="lane_customer" value="Customer" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;fontSize=12;fontStyle=1;fillColor=#F7F9FC;strokeColor=#BCC7D4;" vertex="1" parent="1">
+          <mxGeometry x="48.0" y="48.0" width="760.0" height="160.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="lane_operations" value="Operations" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;fontSize=12;fontStyle=1;fillColor=#F7F9FC;strokeColor=#BCC7D4;" vertex="1" parent="1">
+          <mxGeometry x="48.0" y="228.0" width="760.0" height="160.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_start" value="Start" style="ellipse;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#F1F5F9;strokeColor=#486581;fontColor=#1B1F24;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="68.0" y="96.0" width="132.0" height="92.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_submit" value="Submit order" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#F1F5F9;strokeColor=#486581;fontColor=#1B1F24;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="264.0" y="96.0" width="132.0" height="92.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_review" value="Approved?" style="rhombus;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#F1F5F9;strokeColor=#486581;fontColor=#1B1F24;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="264.0" y="276.0" width="132.0" height="92.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_record" value="Record order" style="shape=parallelogram;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#F1F5F9;strokeColor=#486581;fontColor=#1B1F24;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="460.0" y="276.0" width="132.0" height="92.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_end" value="Done" style="ellipse;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#F1F5F9;strokeColor=#486581;fontColor=#1B1F24;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="656.0" y="96.0" width="132.0" height="92.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_0" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_start" target="node_submit">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_submit" target="node_review">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_2" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_review" target="node_record">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_3" value="Confirmation" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;dashed=1;dashPattern=6 4;" edge="1" parent="1" source="node_record" target="node_end">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_4" value="Revise" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_review" target="node_submit">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

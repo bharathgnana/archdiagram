@@ -26,6 +26,8 @@ def node_icon_pngs(
     svg_relpaths: dict[str, str] = {}  # relpath -> svg text (dedup)
 
     for node in diagram.nodes:
+        if node.kind != "service":
+            continue
         entry = catalog.lookup(node.service)
         if entry is None:
             warnings.append(f"unknown service '{node.service}' (node '{node.id}') -> fallback box")

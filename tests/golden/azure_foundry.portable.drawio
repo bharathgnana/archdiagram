@@ -1,0 +1,103 @@
+<mxfile host="archdiagram" type="device">
+  <diagram id="page-1" name="Baseline Azure AI Foundry">
+    <mxGraphModel dx="0" dy="0" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="860" pageHeight="790" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="Baseline Azure AI Foundry" style="text;html=1;align=center;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="8.0" y="8.0" width="844.0" height="24.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="grp_edge" value="Edge / ingress" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;fontSize=12;fontStyle=1;fillColor=#E0EEF9;strokeColor=#0078D4;fontColor=#0078D4;" vertex="1" parent="1">
+          <mxGeometry x="48.0" y="48.0" width="176.0" height="430.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="grp_app" value="Application tier" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;fontSize=12;fontStyle=1;fillColor=#E0EEF9;strokeColor=#0078D4;fontColor=#0078D4;" vertex="1" parent="1">
+          <mxGeometry x="244.0" y="48.0" width="372.0" height="298.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="grp_ai" value="AI services" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;fontSize=12;fontStyle=1;fillColor=#E0EEF9;strokeColor=#0078D4;fontColor=#0078D4;" vertex="1" parent="1">
+          <mxGeometry x="440.0" y="48.0" width="372.0" height="430.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="grp_ops" value="Identity &amp; monitoring" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;fontSize=12;fontStyle=1;fillColor=#E0EEF9;strokeColor=#0078D4;fontColor=#0078D4;" vertex="1" parent="1">
+          <mxGeometry x="440.0" y="444.0" width="372.0" height="298.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_agw" value="App Gateway + WAF" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="112.0" y="108.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_fw" value="Azure Firewall" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="112.0" y="240.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_bastion" value="Bastion" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="112.0" y="372.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_app" value="App Service" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="308.0" y="108.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_kv" value="Key Vault" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="504.0" y="108.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_storage" value="Storage" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="504.0" y="240.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_foundry" value="AI Foundry" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="504.0" y="372.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_openai" value="Azure OpenAI" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="700.0" y="108.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_search" value="AI Search" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="700.0" y="240.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_cosmos" value="Cosmos DB" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="700.0" y="372.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_entra" value="Entra ID" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="700.0" y="504.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_mi" value="Managed Identity" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="504.0" y="504.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_monitor" value="Azure Monitor" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="700.0" y="636.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_appins" value="App Insights" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#0078D4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="504.0" y="636.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_0" value="https" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_agw" target="node_app">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_1" value="egress" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_fw" target="node_app">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_2" value="inference" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_app" target="node_foundry">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_foundry" target="node_openai">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_4" value="RAG" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_foundry" target="node_search">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_5" value="state" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_foundry" target="node_cosmos">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_6" value="secrets" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_app" target="node_kv">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_app" target="node_storage">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_8" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_app" target="node_mi">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_mi" target="node_entra">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_10" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_app" target="node_appins">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_appins" target="node_monitor">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,76 @@
+<mxfile host="archdiagram" type="device">
+  <diagram id="page-1" name="Multi-tenant agentic AI on Google Cloud">
+    <mxGraphModel dx="0" dy="0" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1056" pageHeight="658" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="Multi-tenant agentic AI on Google Cloud" style="text;html=1;align=center;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="8.0" y="8.0" width="1040.0" height="24.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="grp_routing" value="Routing hub" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;fontSize=12;fontStyle=1;fillColor=#E8F0FD;strokeColor=#4285F4;fontColor=#4285F4;" vertex="1" parent="1">
+          <mxGeometry x="48.0" y="48.0" width="568.0" height="166.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="grp_governance" value="Governance &amp; security hub" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;fontSize=12;fontStyle=1;fillColor=#E8F0FD;strokeColor=#4285F4;fontColor=#4285F4;" vertex="1" parent="1">
+          <mxGeometry x="48.0" y="48.0" width="960.0" height="298.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="grp_tenant_a" value="Tenant A" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;fontSize=12;fontStyle=1;fillColor=#E8F0FD;strokeColor=#4285F4;fontColor=#4285F4;" vertex="1" parent="1">
+          <mxGeometry x="636.0" y="180.0" width="372.0" height="430.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_armor" value="Cloud Armor" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#4285F4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="112.0" y="108.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_lb" value="Load Balancing" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#4285F4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="308.0" y="108.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_run" value="Cloud Run portal" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#4285F4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="504.0" y="108.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_scc" value="Security Cmd Center" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#4285F4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="700.0" y="108.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_iam" value="Central IAM" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#4285F4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="112.0" y="240.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_logging" value="Cloud Logging" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#4285F4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="896.0" y="108.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_agent" value="Agent Runtime" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#4285F4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="700.0" y="240.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_gemini" value="Gemini" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#4285F4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="896.0" y="240.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_modelarmor" value="Model Armor" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#4285F4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="896.0" y="372.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="node_datastore" value="Datastore (BigQuery)" style="rounded=1;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#4285F4;strokeColor=none;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="896.0" y="504.0" width="48.0" height="48.0" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_0" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_armor" target="node_lb">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_lb" target="node_run">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_2" value="route" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_run" target="node_agent">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_3" value="sanitize" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_agent" target="node_modelarmor">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_4" value="generate" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_agent" target="node_gemini">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_5" value="RAG" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_agent" target="node_datastore">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_run" target="node_scc">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="node_scc" target="node_logging">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

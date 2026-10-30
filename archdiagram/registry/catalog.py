@@ -1,6 +1,7 @@
 """Vendor service catalog.
 
-Loads the bundled ``catalog_data/*.json`` files and exposes a lookup from a
+Loads the bundled ``catalog_data/*.json`` files and an optional generated icon
+manifest, and exposes a lookup from a
 ``"<vendor>.<service_key>"`` string to a :class:`ServiceEntry` containing the
 draw.io native style, the icon filename (for embedding / PDF / vsdx), default
 size and the vendor accent colour (used for graceful fallback boxes).
@@ -33,6 +34,8 @@ class ServiceEntry:
     accent: str
     w: int = 48
     h: int = 48
+    category: str = ""
+    aliases: tuple[str, ...] = ()
 
     @property
     def service(self) -> str:
@@ -50,7 +53,7 @@ class Catalog:
     def vendors(self) -> list[str]:
         return sorted(self._accents)
 
-    def lookup(self, service: str) -> ServiceEntry | None:
+    def lookup(self, service: str | None) -> ServiceEntry | None:
         return self._entries.get(service)
 
     def accent(self, vendor: str) -> str:
@@ -67,7 +70,8 @@ class Catalog:
             return []
         scored: list[tuple[int, ServiceEntry]] = []
         for entry in self._entries.values():
-            haystacks = (entry.service.lower(), entry.label.lower(), entry.key.lower())
+            haystacks = (entry.service.lower(), entry.label.lower(), entry.key.lower(),
+                         entry.category.lower(), *(alias.lower() for alias in entry.aliases))
             best = None
             for hay in haystacks:
                 if hay == q:
@@ -104,9 +108,49 @@ def _load_vendor_file(path: str) -> tuple[str, str, dict[str, ServiceEntry]]:
     return vendor, accent, entries
 
 
+def _manifest_path() -> str:
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    return os.environ.get("ARCHDIAGRAM_CATALOG", os.path.join(repo_root, "catalog", "manifest.json"))
+
+
+def _load_manifest(path: str, accents: dict[str, str]) -> dict[str, ServiceEntry]:
+    """Load entries generated from local vendor SVG packs.
+
+    Existing bundled IDs retain their definitions when the two catalogs merge.
+    Icon paths are relative to the icon cache, never to the manifest file.
+    """
+    with open(path, "r", encoding="utf-8") as fh:
+        data = json.load(fh)
+    if data.get("version") != 1 or not isinstance(data.get("icons"), dict):
+        raise ValueError(f"unsupported icon catalog manifest: {path}")
+    entries: dict[str, ServiceEntry] = {}
+    for service, item in data["icons"].items():
+        vendor = item["provider"]
+        if not service.startswith(vendor + "."):
+            raise ValueError(f"invalid icon catalog id: {service}")
+        icon = item["file"].replace("\\", "/")
+        if (icon.split("/", 1)[0].lower() != vendor or ":" in icon or
+                any(part in ("", ".", "..") for part in icon.split("/"))):
+            raise ValueError(f"invalid icon catalog path: {icon}")
+        accents.setdefault(vendor, _DEFAULT_ACCENT)
+        entries[service] = ServiceEntry(
+            vendor=vendor,
+            key=service[len(vendor) + 1:],
+            label=item.get("label", service[len(vendor) + 1:].replace("_", " ").title()),
+            native_style="",
+            icon=icon,
+            accent=accents[vendor],
+            w=round(item.get("width", 48)),
+            h=round(item.get("height", 48)),
+            category=item.get("category", ""),
+            aliases=tuple(item.get("aliases", ())),
+        )
+    return entries
+
+
 @lru_cache(maxsize=1)
 def get_catalog() -> Catalog:
-    """Build (and cache) the catalog from the bundled data files."""
+    """Build (and cache) the bundled catalog plus an optional local manifest."""
 
     entries: dict[str, ServiceEntry] = {}
     accents: dict[str, str] = {}
@@ -119,4 +163,8 @@ def get_catalog() -> Catalog:
             )
             accents[vendor] = accent
             entries.update(vendor_entries)
+    manifest = _manifest_path()
+    if os.path.isfile(manifest):
+        for service, entry in _load_manifest(manifest, accents).items():
+            entries.setdefault(service, entry)
     return Catalog(entries, accents)

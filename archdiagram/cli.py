@@ -1,7 +1,7 @@
 """Command-line interface for archdiagram.
 
     archdiagram validate <spec.json>
-    archdiagram render   <spec.json> --format pdf|drawio|vsdx -o out.ext
+    archdiagram render   <spec.json> --format pdf|drawio|vsdx|svg|html|pptx -o out.ext
                           [--drawio-mode native|portable] [--icons DIR]
     archdiagram catalog  search <query>
     archdiagram catalog  list [--vendor azure]
@@ -10,13 +10,18 @@
 from __future__ import annotations
 
 import argparse
+import json
+import os
 import sys
 
 from .emit.drawio import NATIVE, PORTABLE, emit_drawio
 from .emit.pdf import PdfDependencyError, emit_pdf
+from .emit.pptx import emit_pptx
+from .emit.svg import render_html, render_svg
 from .emit.vsdx import emit_vsdx
 from .registry.catalog import get_catalog
 from .spec.validate import SpecError, SpecValidationError, load_spec
+from .templates import get_template, list_templates, suggest_template
 
 
 def _cmd_validate(args: argparse.Namespace) -> int:
@@ -37,7 +42,7 @@ def _cmd_validate(args: argparse.Namespace) -> int:
 
 def _default_out(spec_path: str, fmt: str) -> str:
     base = spec_path.rsplit(".", 1)[0] if "." in spec_path else spec_path
-    ext = {"pdf": "pdf", "drawio": "drawio", "vsdx": "vsdx"}[fmt]
+    ext = {"pdf": "pdf", "drawio": "drawio", "vsdx": "vsdx", "svg": "svg", "html": "html", "pptx": "pptx"}[fmt]
     return f"{base}.{ext}"
 
 
@@ -56,13 +61,21 @@ def _cmd_render(args: argparse.Namespace) -> int:
         elif args.format == "drawio":
             mode = PORTABLE if args.drawio_mode == "portable" else NATIVE
             xml = emit_drawio(diagram, mode=mode, icon_cache=args.icons)
-            import os
-
             os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
             with open(out_path, "w", encoding="utf-8") as fh:
                 fh.write(xml)
         elif args.format == "vsdx":
             warnings = emit_vsdx(diagram, out_path, icon_cache=args.icons)
+        elif args.format == "pptx":
+            warnings = emit_pptx(diagram, out_path, icon_cache=args.icons)
+        elif args.format in ("svg", "html"):
+            content, warnings = (
+                render_svg(diagram, icon_cache=args.icons)
+                if args.format == "svg" else render_html(diagram, icon_cache=args.icons)
+            )
+            os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
+            with open(out_path, "w", encoding="utf-8") as fh:
+                fh.write(content)
         else:  # pragma: no cover - argparse restricts choices
             print(f"unknown format: {args.format}", file=sys.stderr)
             return 2
@@ -96,6 +109,17 @@ def _cmd_catalog(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_templates(args: argparse.Namespace) -> int:
+    if args.template_cmd == "list":
+        for item in list_templates():
+            print(f"{item['name']}: {item['description']}")
+    elif args.template_cmd == "suggest":
+        print(suggest_template(args.description))
+    else:
+        print(json.dumps(get_template(args.name), indent=2))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="archdiagram", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -107,7 +131,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_ren = sub.add_parser("render", help="render a spec to a diagram file")
     p_ren.add_argument("spec", help="path to spec JSON (or JSON string)")
     p_ren.add_argument(
-        "--format", "-f", required=True, choices=["pdf", "drawio", "vsdx"], help="output format"
+        "--format", "-f", required=True, choices=["pdf", "drawio", "vsdx", "svg", "html", "pptx"], help="output format"
     )
     p_ren.add_argument("--output", "-o", help="output path (default: alongside spec)")
     p_ren.add_argument(
@@ -127,6 +151,17 @@ def build_parser() -> argparse.ArgumentParser:
     p_list = cat_sub.add_parser("list", help="list services")
     p_list.add_argument("--vendor", help="filter by vendor")
     p_list.set_defaults(func=_cmd_catalog)
+
+    p_tpl = sub.add_parser("templates", help="list, suggest, or show starter specs")
+    tpl_sub = p_tpl.add_subparsers(dest="template_cmd", required=True)
+    tpl_list = tpl_sub.add_parser("list")
+    tpl_list.set_defaults(func=_cmd_templates)
+    tpl_show = tpl_sub.add_parser("show")
+    tpl_show.add_argument("name", choices=[t["name"] for t in list_templates()])
+    tpl_show.set_defaults(func=_cmd_templates)
+    tpl_suggest = tpl_sub.add_parser("suggest")
+    tpl_suggest.add_argument("description")
+    tpl_suggest.set_defaults(func=_cmd_templates)
 
     return parser
 
