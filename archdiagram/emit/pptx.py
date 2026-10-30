@@ -6,7 +6,7 @@ import html
 import os
 import zipfile
 
-from ..layout.engine import ICON_SIZE, layout_diagram
+from ..layout.engine import ICON_SIZE, lane_bands, layout_diagram
 from ..registry.catalog import catalog_for
 from ..registry.icons import IconResolver
 from ..spec.model import Diagram
@@ -45,14 +45,18 @@ def _text(text: str, size: int = 1200, color: str = "1B1F24") -> str:
 
 def _shape(sid: int, name: str, x: float, y: float, w: float, h: float, *,
            geom: str = "rect", fill: str = "FFFFFF", line: str = "486581",
-           text: str = "", size: int = 1200) -> str:
+           text: str = "", size: int = 1200, opacity: int | None = None) -> str:
+    fill_xml = (f'<a:solidFill><a:srgbClr val="{_color(fill)}"/></a:solidFill>'
+                if opacity is None else
+                f'<a:solidFill><a:srgbClr val="{_color(fill)}"><a:alpha val="{opacity}"/>'
+                '</a:srgbClr></a:solidFill>')
     return (
         '<p:sp><p:nvSpPr>'
         f'<p:cNvPr id="{sid}" name="{_e(name)}"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>'
         '<p:spPr><a:xfrm>'
         f'<a:off x="{_n(x)}" y="{_n(y)}"/><a:ext cx="{_n(w)}" cy="{_n(h)}"/>'
         f'</a:xfrm><a:prstGeom prst="{geom}"><a:avLst/></a:prstGeom>'
-        f'<a:solidFill><a:srgbClr val="{_color(fill)}"/></a:solidFill>'
+        f'{fill_xml}'
         f'<a:ln w="12700"><a:solidFill><a:srgbClr val="{_color(line)}"/></a:solidFill></a:ln>'
         '</p:spPr>' + (_text(text, size) if text else '') + '</p:sp>'
     )
@@ -140,15 +144,16 @@ def emit_pptx(diagram: Diagram, out_path: str, *, icon_cache: str | None = None)
     shapes.append(_shape(sid, "Title", 8, 4, layout.width-16, 32,
                          fill="FFFFFF", line="FFFFFF", text=diagram.title, size=1600))
     sid += 1
-    for lane in diagram.lanes:
-        lb = layout.lane_boxes.get(lane.id)
-        if lb:
-            shapes.append(_shape(sid, f"Lane {lane.id}", lb.x, lb.y+36, lb.w, lb.h,
-                                 fill="F7F9FC", line="BCC7D4"))
-            sid += 1
-            shapes.append(_shape(sid, f"Lane label {lane.id}", lb.x+8, lb.y+38, min(150, lb.w-16), 24,
-                                 fill="F7F9FC", line="F7F9FC", text=lane.display_label))
-            sid += 1
+    for lane_id, lane_label, lb in lane_bands(diagram, layout):
+        modern = diagram.lane_orientation is not None
+        fill = "F5F5F5" if modern else "F7F9FC"
+        line = "999999" if modern else "BCC7D4"
+        shapes.append(_shape(sid, f"Lane {lane_id}", lb.x, lb.y+36, lb.w, lb.h,
+                             fill=fill, line=line, opacity=30000 if modern else None))
+        sid += 1
+        shapes.append(_shape(sid, f"Lane label {lane_id}", lb.x+8, lb.y+38, min(150, lb.w-16), 24,
+                             fill=fill, line=fill, text=lane_label))
+        sid += 1
     for group in diagram.groups:
         gb = layout.group_boxes.get(group.id)
         if gb:

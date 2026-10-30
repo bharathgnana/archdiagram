@@ -16,7 +16,7 @@ import os
 import math
 import zipfile
 
-from ..layout.engine import ICON_SIZE, layout_diagram
+from ..layout.engine import ICON_SIZE, lane_bands, layout_diagram
 from ..registry.catalog import catalog_for
 from ..registry.icons import IconResolver
 from ..spec.model import Diagram
@@ -196,6 +196,7 @@ def _rect_shape(
     valign_top: bool = False,
     font_color: str = "#1B1F24",
     kind: str = "process",
+    opacity: float | None = None,
 ) -> str:
     pin_x = _in(x + w / 2)
     pin_y = _in(page_h - (y + h / 2))
@@ -210,6 +211,8 @@ def _rect_shape(
     if fill is not None:
         cells.append(f'      <Cell N="FillForegnd" V="{fill}"/>')
         cells.append('      <Cell N="FillPattern" V="1"/>')
+        if opacity is not None:
+            cells.append(f'      <Cell N="FillForegndTrans" V="{1 - opacity:.1f}"/>')
     else:
         cells.append('      <Cell N="FillPattern" V="0"/>')
     if stroke is not None:
@@ -306,15 +309,15 @@ def emit_vsdx(
     rel_counter = 1
 
     # Swim lanes and group containers first.
-    for lane in diagram.lanes:
-        lb = layout.lane_boxes.get(lane.id)
-        if lb is not None:
-            shapes.append(_rect_shape(
-                sid, lb.x, lb.y, lb.w, lb.h, page_h,
-                fill="#F7F9FC", stroke="#BCC7D4", text=lane.display_label,
-                valign_top=True,
-            ))
-            sid += 1
+    for lane_id, lane_label, lb in lane_bands(diagram, layout):
+        modern = diagram.lane_orientation is not None
+        shapes.append(_rect_shape(
+            sid, lb.x, lb.y, lb.w, lb.h, page_h,
+            fill="#F5F5F5" if modern else "#F7F9FC",
+            stroke="#999999" if modern else "#BCC7D4", text=lane_label,
+            valign_top=True, opacity=0.3 if modern else None,
+        ))
+        sid += 1
 
     for group in diagram.groups:
         gb = layout.group_boxes.get(group.id)

@@ -13,7 +13,7 @@ from __future__ import annotations
 import base64
 import math
 
-from ..layout.engine import ICON_SIZE, Box, LayoutResult
+from ..layout.engine import ICON_SIZE, Box, LayoutResult, lane_bands
 from ..registry.catalog import Catalog
 from ..spec.model import Diagram, Edge
 from ..shapes import SHAPES
@@ -127,17 +127,17 @@ def build_page_svg(
     dy = title_band  # shift all content below the title band
 
     # Swim lanes are the backmost containers.
-    for lane in diagram.lanes:
-        lb = layout.lane_boxes.get(lane.id)
-        if lb is None:
-            continue
+    for lane_id, lane_label, lb in lane_bands(diagram, layout):
+        fill = "#F5F5F5" if diagram.lane_orientation else "#F7F9FC"
+        stroke = "#999999" if diagram.lane_orientation else "#BCC7D4"
+        opacity = ' fill-opacity="0.3"' if diagram.lane_orientation else ""
         parts.append(
             f'<rect x="{lb.x:.1f}" y="{lb.y + dy:.1f}" width="{lb.w:.1f}" height="{lb.h:.1f}" '
-            f'rx="6" fill="#F7F9FC" stroke="#BCC7D4" stroke-width="1.5"/>'
+            f'rx="6" fill="{fill}" stroke="{stroke}" stroke-width="1.5"{opacity}/>'
         )
         parts.append(
             f'<text x="{lb.x + 12:.1f}" y="{lb.y + dy + 19:.1f}" font-family="{_FONT}" '
-            f'font-size="12" font-weight="600" fill="#35465A">{_esc(lane.display_label)}</text>'
+            f'font-size="12" font-weight="600" fill="#35465A">{_esc(lane_label)}</text>'
         )
 
     # Group containers (drawn first, behind nodes/edges).

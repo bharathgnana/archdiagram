@@ -294,10 +294,16 @@ def validate_spec(raw: Any) -> Diagram:
     lane_orientation = raw.get("lane_orientation")
     if lane_orientation is not None and lane_orientation not in ("horizontal", "vertical"):
         col.add("lane_orientation", "must be horizontal or vertical")
+    has_explicit_shapes = (any(isinstance(node, dict) and
+                               ("shape" in node or node.get("kind") in ("io", "document", "data_store"))
+                               for node in raw_nodes) if isinstance(raw_nodes, list) else False)
+    modern_lanes = bool(raw_lanes) and (lane_orientation is not None or has_explicit_shapes)
+    if modern_lanes and lane_orientation is None:
+        lane_orientation = "horizontal"
     _warn_unknown_keys(raw, {"title", "direction", "nodes", "edges", "groups", "lanes", "lane_orientation"}, "<root>", col)
 
     # Cross-reference checks (only meaningful once individual items parsed).
-    _check_cross_references(nodes, edges, groups, lanes, col)
+    _check_cross_references(nodes, edges, groups, lanes, col, allow_unassigned=modern_lanes)
 
     if col.errors:
         raise SpecValidationError(col.errors)
@@ -316,7 +322,8 @@ def validation_errors(raw: Any) -> list[str]:
 
 
 def _check_cross_references(
-    nodes: list[Node], edges: list[Edge], groups: list[Group], lanes: list[Lane], col: _Collector
+    nodes: list[Node], edges: list[Edge], groups: list[Group], lanes: list[Lane], col: _Collector,
+    *, allow_unassigned: bool = False,
 ) -> None:
     node_ids: set[str] = set()
     for i, node in enumerate(nodes):
@@ -338,12 +345,18 @@ def _check_cross_references(
     for i, lane in enumerate(lanes):
         if lane.id in lane_ids:
             col.add(f"lanes[{i}].id", f"duplicate lane id '{lane.id}'")
+        if allow_unassigned and lane.id == "__archdiagram_unassigned__":
+            col.add(f"lanes[{i}].id", "reserved for the unassigned band")
         lane_ids.add(lane.id)
     for i, node in enumerate(nodes):
         if node.lane is not None and node.lane not in lane_ids:
             col.add(f"nodes[{i}].lane", f"references unknown lane '{node.lane}'")
-        elif lanes and node.lane is None:
+        elif lanes and node.lane is None and not allow_unassigned:
             col.add(f"nodes[{i}].lane", "required when lanes are defined")
+        if allow_unassigned and (node.x is not None or node.y is not None):
+            col.add(f"nodes[{i}]", "explicit x/y cannot be combined with swim lanes")
+        if allow_unassigned and node.group is not None:
+            col.add(f"nodes[{i}].group", "groups nested in swim lanes are not supported")
 
     for i, edge in enumerate(edges):
         if edge.source not in node_ids:

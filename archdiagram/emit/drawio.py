@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import html
 
-from ..layout.engine import ICON_SIZE, layout_diagram
+from ..layout.engine import ICON_SIZE, lane_bands, layout_diagram
 from ..registry.catalog import catalog_for
 from ..registry.icons import IconResolver
 from ..spec.model import Diagram
@@ -103,15 +103,15 @@ def emit_drawio(diagram: Diagram, mode: str = PORTABLE, *, icon_cache: str | Non
         )
     )
 
-    for lane in diagram.lanes:
-        lb = layout.lane_boxes.get(lane.id)
-        if lb is not None:
-            body.append(_cell(
-                f"lane_{lane.id}", lane.display_label,
-                "rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;"
-                "fontSize=12;fontStyle=1;fillColor=#F7F9FC;strokeColor=#BCC7D4;",
-                lb.x, lb.y, lb.w, lb.h,
-            ))
+    for lane_id, lane_label, lb in lane_bands(diagram, layout):
+        style = (
+            "rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;"
+            "fontSize=12;fontStyle=1;fillColor=#F5F5F5;strokeColor=#999999;opacity=30;"
+            if diagram.lane_orientation else
+            "rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;"
+            "fontSize=12;fontStyle=1;fillColor=#F7F9FC;strokeColor=#BCC7D4;"
+        )
+        body.append(_cell(f"lane_{lane_id}", lane_label, style, lb.x, lb.y, lb.w, lb.h))
 
     # Group containers (behind nodes by document order).
     for group in diagram.groups:

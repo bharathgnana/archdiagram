@@ -27,6 +27,7 @@ GROUP_PAD = 22
 GROUP_HEADER = 30
 LANE_PAD = 20
 LANE_HEADER = 28
+UNASSIGNED_LANE = "__archdiagram_unassigned__"
 
 
 @dataclass
@@ -81,6 +82,80 @@ class LayoutResult:
     lane_boxes: dict[str, LaneBox] = field(default_factory=dict)
     width: float = 0.0
     height: float = 0.0
+
+
+def lane_bands(diagram: Diagram, layout: LayoutResult) -> list[tuple[str, str, LaneBox]]:
+    """Defined lanes in spec order, followed by a generated unassigned band."""
+    bands = [(lane.id, lane.display_label, layout.lane_boxes[lane.id])
+             for lane in diagram.lanes if lane.id in layout.lane_boxes]
+    if UNASSIGNED_LANE in layout.lane_boxes:
+        bands.append((UNASSIGNED_LANE, "Unassigned", layout.lane_boxes[UNASSIGNED_LANE]))
+    return bands
+
+
+def _layout_lanes(diagram: Diagram) -> LayoutResult:
+    """Ordered horizontal or vertical bands with individually sized nodes."""
+    horizontal = diagram.lane_orientation != "vertical"
+    layers = _compute_forward_layers(diagram)
+    for node in diagram.nodes:
+        if node.tier is not None:
+            layers[node.id] = node.tier
+    dimensions = {}
+    for node in diagram.nodes:
+        style = SHAPES.get(node.shape or "")
+        dimensions[node.id] = (style.width, style.height) if style else (NODE_W, NODE_H)
+    ranks = sorted(set(layers.values()))
+    flow_positions: dict[int, float] = {}
+    cursor = MARGIN + LANE_PAD
+    for rank in ranks:
+        flow_positions[rank] = cursor
+        members = [node.id for node in diagram.nodes if layers[node.id] == rank]
+        size = max(dimensions[node_id][0 if horizontal else 1] for node_id in members)
+        cursor += size + (H_GAP if horizontal else V_GAP)
+    flow_extent = cursor - (H_GAP if horizontal else V_GAP) + LANE_PAD
+
+    band_ids = [lane.id for lane in diagram.lanes]
+    if any(node.lane is None for node in diagram.nodes):
+        band_ids.append(UNASSIGNED_LANE)
+    lane_boxes: dict[str, LaneBox] = {}
+    boxes: dict[str, Box] = {}
+    cross_cursor = MARGIN
+    for band_id in band_ids:
+        members = [node for node in diagram.nodes
+                   if (node.lane or UNASSIGNED_LANE) == band_id]
+        stacks = []
+        for rank in ranks:
+            rank_members = [node for node in members if layers[node.id] == rank]
+            if rank_members:
+                stack_size = sum(dimensions[node.id][1 if horizontal else 0]
+                                 for node in rank_members)
+                stack_size += (len(rank_members) - 1) * (V_GAP if horizontal else H_GAP)
+                stacks.append(stack_size)
+        band_size = max(80, LANE_HEADER + 2 * LANE_PAD + max(stacks, default=0))
+        if horizontal:
+            lane_boxes[band_id] = LaneBox(band_id, MARGIN, cross_cursor,
+                                          flow_extent - MARGIN, band_size)
+        else:
+            lane_boxes[band_id] = LaneBox(band_id, cross_cursor, MARGIN,
+                                          band_size, flow_extent - MARGIN)
+        for rank in ranks:
+            offset = cross_cursor + LANE_HEADER + LANE_PAD
+            for node in members:
+                if layers[node.id] != rank:
+                    continue
+                width, height = dimensions[node.id]
+                if horizontal:
+                    boxes[node.id] = Box(node.id, flow_positions[rank], offset, width, height)
+                    offset += height + V_GAP
+                else:
+                    boxes[node.id] = Box(node.id, offset, flow_positions[rank], width, height)
+                    offset += width + H_GAP
+        cross_cursor += band_size + LANE_PAD
+    width = max([MARGIN] + [box.x + box.w for box in boxes.values()] +
+                [box.x + box.w for box in lane_boxes.values()]) + MARGIN
+    height = max([MARGIN] + [box.y + box.h for box in boxes.values()] +
+                 [box.y + box.h for box in lane_boxes.values()]) + MARGIN
+    return LayoutResult(boxes=boxes, lane_boxes=lane_boxes, width=width, height=height)
 
 
 def _compute_layers(diagram: Diagram) -> dict[str, int]:
@@ -294,6 +369,8 @@ def _layout_shaped(diagram: Diagram) -> LayoutResult:
 
 
 def layout_diagram(diagram: Diagram) -> LayoutResult:
+    if diagram.lanes and diagram.lane_orientation is not None:
+        return _layout_lanes(diagram)
     if any(node.shape is not None or node.tier is not None for node in diagram.nodes):
         return _layout_shaped(diagram)
     horizontal = diagram.direction in ("LR", "RL")
