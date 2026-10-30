@@ -1,0 +1,318 @@
+source folder export equals equals equals root c colon backslash users
+backslash adabab backslash architecture diagram generated UTC 2026 dash 10 dash
+15 t8 23 45 plus 0 0 0 included files 48 included bytes 510 531 gift files 26
+directory tree equals equals equals architecture diagram slash dot Claude
+slash settings dot local dot JSON dot Claude plug-in slash marketplace dot
+JSON plug-in dot JSON catalog slash build catalog dot pi manifest dot JSON
+examples slash Azure cloud architecture dot JSON capability map dot JSON data
+pipeline flow dot JSON deal approval flow dot JSON investment approval flow dot
+JSON keep on boarding decision dot JSON period close flow dot JSON pmo stage
+gate flow dot JSON train settlement swim lane dot JSON generator slash a dot pi
+draw your gen dot pi engine dot pi HTML export dot pi icon resolver dot pi
+layout dot pi PDF export dot pi PPTX export dot pi rasterize dot pi back
+schema dot JSON SVG export dot pi MCP server slash in it dot pi main dot pi
+requirements dot txt server dot pi tools dot pi crypt slash set up icons dot pi
+test slash fixtures slash sample spec dot JSON swim lane spec dot JSON functional
+one slash aspect dot JSON can test dot pi test catalog and resolver dot pi
+test engine dot pi test generate dot pi test MCP tools dot pi test PPTX export
+dot pi test process flow dot pi test skills sync dot pi test swim lane dot
+pi tool slash SVG to PDF.js SVG to PNG.js ply dot pi compressor dot pi package
+dot JSON ticked files equals equals equals dot Claude slash skills slash
+architecture diagram slash skill dot MD non code file dot Claude slash skill slash
+dataflow slash skill dot MD none code file dot klawd slash skill slash decision
+flow slash skill dot MD. None code fire. Plot slash skill slash process flow slash
+skill dot MD. None code file dot aged nor not code file
+call.md.
+Noncode file.
+Compressed code.txt.
+Output file.
+Doc slash Azure Hosting Architecture dot draw wheel.
+Noncode file.
+Doc slash Azure Hosting Architecture dot SVG.
+Noncode file.
+Doc slash Azure Hosting in for brief dot MD.
+Noncode file.
+Doc slash role expansion plan dot MD.
+Noncode file.
+Documentation dot MD.
+Noncode file.
+Download dot PNG.
+Noncode file.
+MCP server slash read me dot MD.
+Noncode file.
+Onboarding dot MD.
+Noncode file.
+Package lock dot JSON.
+Noncode file.
+Public repository comparison dot MD.
+Noncode file.
+Read me dot MD.
+Noncode file.
+Repository guide dot MD.
+Noncode file.
+Skill slash architecture diagram slash skill dot MD.
+Noncode file.
+Skill slash data flow slash skill dot MD.
+Noncode file.
+Skill slash decision flow slash skill dot MD.
+Noncode file.
+Skill slash process flow slash skill dot MD.
+Noncode file.
+Test slash functional one slash add dsxtentiving dot SVG.
+Noncode file.
+Test slash functional one slash identity architecture as dot VSTX.
+Noncode file.
+Test slash functional one slash read me.
+Noncode file.
+Equals equals equals.
+File zero zero zero one.
+Dot plot plug-in slash marketplace dot JSON.
+Folder level one.
+Folder dot plot plug-in.
+Size bytes six hundred nineteen.
+Equals equals equals.
+Dollar schema.
+Https colon slash slash JSON dot schema store dot org slash plot code marketplace dot JSON.
+Name oak tree guard shools.
+Description.
+Architecture diagram.
+Tooling for oak tree.
+I can reach draw dot EO slash SVG slash HTML slash VSTX generation.
+From a JSON spec.
+Owner.
+Name oak tree architecture.
+Email.
+Adapad Oaktree Capital dot com.
+Plugins.
+Name architecture diagram.
+Source dot slash.
+Description.
+Convert an architecture spec JSON into an editable draw dot EO slash SVG slash HTML slash VSTX diagram with official vendor service icons.
+Bundles the architecture diagram scale at an MCK server.
+equals equals equals, file 0002, dot plot plug-in slash plug-in dot JSON, folder level,
+one folder, dot plot plug-in, size bytes, 807, equals equals equals, dollar schema,
+hdtps colon slash slash JSON dot schema store dot org slash quad code plug-in manifest dot JSON,
+name, mark texture diagram, version 1.0.0, description, spec JSON to editable draw dot
+EO slash SVG slash HTML slash PDF diagrams, four diagram types, architecture cloud slash system,
+topology with Azure slash in the U.S. slash GCP slash K8s icons, process flow operational
+workflows plus swim lanes, decision flow approval trees, data flow ATL slash lineage pipelines,
+pro-python engine plus MCP server, author, name, oak tree architecture, email,
+head off at oak tree capital dot com, keywords, architecture, diagram,
+draw URL, process flow, data flow, decision flow icons, Azure, MCP servers, architecture diagram,
+command python, args, dollar plot plug-in root slash MCP server slash server dot
+pie, equals equals equals, file 0003 dot plot slash settings dot local dot JSON, folder level,
+one folder, dot plot, size bytes, 496, equals equals equals, permissions, allow, batch python
+M unitist discover s tests pvax slash test asterisk dot pyvax slash bash python client dot
+pyout put slash citric sun perspective dot JSON oout put slash citric sun from dot bsdx bash python
+klai dot kout put slash oak tree arch, bash python, bash python c backslash input sys, lies equals sys
+dot stden dot read, backslash, backslash, backslash, backslash, dot split line, backslash, backslash,
+backslash, backslash, print backslash, backslash, backslash, backslash, backslash, and dot join backslash,
+backslash, lines four, backslash, backslash, backslash, backslash, backslash, backslash,
+web search, power shell and pm, install asterisk, equals equals equals, file 0004,
+catalog slash buildcatalog dot py, folder level, one folder, catalog, size bytes, 7703,
+equals equals equals, hash exclamation slash user slash bin slash nph python 3,
+build an icon catalog manifest from official vendor svg sets, walks icon slash provider
+slash optionally with category subfolders and produces, catalog slash manifest dot JSON mapping
+economical service id to its provider, category source file, native dimensions and search aliases,
+the raw svgs are not committed to the repo creadme plus dot giddicore, this script
+ingests whatever the user has downloaded from each vendor's official icon set,
+respecting their usage terms, pure standard library, no third-party dependencies, usage,
+python catalog slash buildcatalog dot py, python catalog slash buildcatalog dot py icons
+dior icons dot catalog slash manifest dot JSON, from future import annotations, import argparse,
+import JSON, import os, import re, import sys, import xml dot a tree dot element tree is et
+from path live import path, hash repo root equals parent of the catalog slash directory,
+icon paths are stored relative, hash to this so manifest dot JSON is portable across machines
+and safe to commit, repo root equals path file dot resolve dot parent dot parent,
+hash default native size used, when an svg declares neither width slash height nor a,
+hash view box we can parse, most vendor service icons are square tilde 18 dash 50px,
+default icon size equals 48.0, hash branding slash provider words that are safe to drop
+wherever they appear, they add, hash node disambiguating value to a service slug,
+note deliberately does not include hash service slash services slash app, which are legitimate
+parts of real names, hash app services, cognitive services, vendor boilerplate is stripped by
+prefix, hash instead see strip boilerplate, noise tokens equals azure, microsoft, os, amazon,
+gcp, google, cloud, logo, logos, color, color, numeric re equals redot compile r backslash d
+plus dollar, hash vendor exports prefix files with an id number and an icon service marker,
+hash eg 10035 icon service app services dot svg, leading number equals redot compile r backslash
+d plus asterisk, boilerplate prefix re equals redot compile r icon service icon service plus
+redot i, token split re-equals redot compile r backslash s plus
+lesser equal az 0 dash 9 equals az
+def strip nstag, str, str
+trip nxml namespace from a tag name and ssvg as vg
+return tag dot r split
+1 1 if in tag else tag, def parse float value
+str none float gun, parse it as vg length
+ignoring unit suffixes like px slash pt
+if not value, return none
+match equals redot match r backslash s asterisk 0 dash 9 asterisk slash
+0 dash 9 plus value
+return float match dot group 1 if match else none
+def read svg dimensions path
+path tuple float, float
+return width, height for an svg
+preferring explicit acts then view box
+falls back to default icon size on anything unparsable so a single
+malformed icon never breaks the whole cataloged bill
+try, hash either parse free
+these icon files are tiny, a single parse is fine
+root equals et dot parse path dot get root
+accept et dot parse error
+return default icon size, default icon size
+if strip ns root dot tag not equals svg
+return default icon size, default icon size
+width equals parse float root dot get width
+height equals parse float root dot get height
+if width and height return width
+height view box equals root dot get view box
+if view box, parts equals read dot split r
+plus view box dot strip
+if len parts equals equals 4
+vbw equals parse float parts 2
+vbh equals parse float parts 3
+if vbw and vbh return vbw vbh
+return width or default icon size
+height or default icon size
+dev tokenize name
+str list str
+break a file name stem into lower case
+noise free search tokens
+name equals leading num read dot sub name
+name equals boilerplate prefix read dot sub name
+raw equals read dot split r plus plus token split read dot pattern
+name tokens list str equals for talk and raw
+talk equals talk dot strip dot lower
+if not talk or talk in noise tokens or numeric read dot match talk
+continue tokens dot append talk
+return tokens def make slug tokens
+list str fallback str str
+build a kabob case service slug from tokens app service
+slug equals dot join tokens
+return slug or read dot sub raz zero dash nine plus
+fallback dot lower dot strip
+def build entry provider str
+svg path path provider root path ticked
+construct a single manifest entry for one svg file
+rel equals svg path dot relative to provider root
+hash category equals first sub folder under the provider
+else general
+category equals rel dot part zero dot lower
+if lamb rel dot parts one else general
+tokens equals tokenize svg path dot stem
+slug equals make slug tokens
+svg path dot stem
+width height equals read svg dimension says vg path
+aliases equals sorted slug
+slug dot replace asterisk tokens
+return id
+if provider slash slug provider provider
+category category file portable path svg path
+width round width two
+height round height two
+aliases aliases death portable path svg path
+path str path relative to the repo root POSIX when possible
+else absolute keeps the committed manifest machine independent for the
+common case where icons live under the repo or are referenced from within it
+try return path os dot path dot real path svg path
+repo root dot is POSIX accept value error
+hash different drive on windows fallback to absolute
+return svg path dot is POSIX death built catalog icons dire
+path ticked can all providers under icons
+diode return the manifest ticked if not icons dire dot is dire
+raise system exit f icons directory not found
+icons direback slash n download the official vendor icon sets first c
+read me dot md entries dikt str dikt equals collisions dikt str int equals
+for provider dire and sorted p for p and icons dire dot iderder if p dot is
+dire provider equals provider dire dot name
+dot lower for svg path and sorted provider dire dot r glob asterisk dot
+svg entry equals build entry provider svg path
+provider dire base id equals entry id hash disambiguate duplicate slugs for
+example variants with a minus two slash three suffix
+if base id in entries collisions base id equals collisions dot get base id
+one plus one entry id equals f base id collisions base id
+entries entry ID equals entry manifest equals version one icon count then entries providers
+sorted E provider for E in entries dot values icons entries return manifest death main arm
+list SDR none equals none end parser equals arg parse dot argument parser description equals
+dump repo root equals path file dot resolve dot parent dot parent parser dot add argument
+icons dire type equals path default equals repo root slash icons help equals root directory
+containing icons slash provider slash asterisk dot svg default dot slash icons parser dot add
+argument out type equals path default equals repo root slash catalog slash manifest dot chase on
+help equals output manifest path default catalog slash manifest dot chase on args equals parser
+dot parse args arg manifest equals build catalog args dot icons dire dot resolve args dot out dot
+parent dot mk dire parents equals true exist okay equals true args dot out dot write text
+json dot dumps manifest indent equals two sort keys equals true plus spec slash n encoding equals
+udf8 print f wrote manifest icon count icons f dot join manifest providers or non args dot out
+return zero if name equals equals main says dot exit main equals equals equals file zero zero five
+catalog slash manifest dot json folder level one folder catalog size bytes two hundred seventy five
+thousand eight hundred eighty six equals equals equals icon count seven hundred five icons azure
+slash up aliases the category other file icon slash azure slash other slash 10 2018 icon service
+azure dot svg height 18.0 id azure slash up provider azure width 18.0 azure slash abs member
+aliases abs abs member abs member member category blockchain file icon slash azure slash blockchain
+ten thousand three hundred seventy four icon service abs member dot svg height 18.0 id
+azure slash abs member provider azure width 18.0 azure slash active directory connect health
+aliases active active directory connect health active directory connect health connect directory
+health category identity file icon slash azure slash identity slash ten thousand two hundred
+twenty four icon service active directory connect health dot svg height 18.0 id azure slash active
+directory connect health provider azure width 18.0 azure slash activity log aliases activity activity
+log log category management plus governance file icon slash azure slash management plus
+governance slash 0007 icon service activity log dot svg height 18.0 id azure slash activity log
+provider azure width 18.0 azure slash activity log two aliases activity activity log activity
+log log category monitor file icon slash azure slash monitor slash 0007 icon service activity
+log dot svg height 18.0 id azure slash activity log two provider azure width 18.0 azure slash
+add b2c aliases add add b2c add b2c b2c category identity file icon slash azure slash identity
+slash ten thousand two hundred twenty eight icon service azure db2c dot svg height 18.0 id
+azure slash add b2c provider azure width 18.0 azure slash administrative units
+aliases administrative administrative units administrative units units category identity
+file icon slash azure slash identity slash 00919 icon service administrative units dot svg
+height 18.0 id azure slash administrative units provider azure width 18.0 azure slash advisor
+aliases advisor category management plus governance file icon slash azure slash management
+plus governance slash 0003 icon service advisor dot svg height 18.0 id azure slash advisor provider
+azure
+With 18.0 Azure slash AI at Edge,
+Aliases, AI, AI at Edge,
+AI at Edge, pet,
+Edge, category, new icons, file,
+icon slash Azure slash new icons,
+slash 03687 icon service,
+iat edge.sbg, height 18.0 ID,
+Azure slash AI at Edge,
+provider, Azure, with 18.0 Azure slash AI Studio,
+Aliases, AI, AI Studio, AI Studio,
+Studio, category, AI plus machine learning,
+file, icon slash Azure slash AI plus machine learning,
+slash 03513 icon service,
+iat edge.sbg, height 18.0 ID,
+Azure slash AI Studio, provider,
+Azure, with 18.0 Azure slash X automatic,
+Aliases, axe, axe automatic,
+axe automatic, automatic,
+category, compute, file, icon slash Azure slash compute
+slash 03543 icon service,
+aka us automatic dot SVG,
+height 18.0 ID, Azure slash axe automatic,
+provider, Azure, with 18.0 Azure slash access to,
+Aliases, axe, access to, access to,
+Istio, category, other, file, icon slash Azure slash
+other slash 033999 icon service,
+aka us Istio dot SVG,
+height 18.0 ID, Azure slash access to,
+provider, Azure, with 18.0 Azure slash X network policy,
+Aliases, axe, axe network policy,
+axe network policy, network, policy,
+category, new icons, file,
+icon slash Azure slash new icons,
+slash 032487601 icon service,
+aka us network policy dot SVG,
+height 18.0 ID, Azure slash axe network policy,
+provider, Azure, with 18.0 Azure slash alerts,
+Aliases, alerts, category,
+management plus governance, file,
+icon slash Azure slash management plus governance,
+slash 00002 icon service alerts dot SVG,
+height 18.0 ID, Azure slash alerts,
+provider, Azure, with 18.0 Azure slash all resources,
+Aliases, all, all resources, all resources,
+resources, category, general, file,
+icons slash Azure slash general slash 10,001 icon service,
+all resources dot SVG, height 18.0 ID,
+Azure slash all resources, provider,
+Azure, with 18.0 Azure slash analysis services,
+Aliases.

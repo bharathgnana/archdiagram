@@ -1,0 +1,270 @@
+Analysis services, Analysis services, Services,
+Category, Analytics, File, icon slash Azure slash
+Analytics slash 10148 icon service analysis services
+dot SVG, Height 18.0, ID, Azure slash analysis services,
+Provider, Azure, Width 18.0, Azure slash anomaly detector,
+Alesis, anomaly, anomaly detector, anomaly detector,
+detector, category, AI plus machine learning, file, icon
+slash Azure slash AI plus machine learning slash 00814 icon
+service anomaly detector dot SVG, Height 18.0, ID, Azure slash
+anomaly detector, Provider, Azure, Width 18.0, Azure slash
+API center, Alesis, API, API center, API center,
+center, category, web, file, icon slash Azure slash web
+slash 03291 icon service API center dot SVG, Height 18.0,
+ID, Azure slash API center, Provider, Azure, Width 18.0,
+Azure slash API connections, Alesis, API, API connections,
+API connections, connections, category, DevOps, file, icon
+slash Azure slash DevOps slash 10048 icon service API
+connections dot SVG, Height 18.0, ID, Azure slash API
+connections, Provider, Azure, Width 18.0, Azure slash API
+connections 2, Alesis, API, API connections, API connections,
+connections, category, integration, file, icon slash Azure
+slash integration slash 10048 icon service API connections
+dot SVG, Height 18.0, ID, Azure slash API connections 2,
+Provider, Azure, Width 18.0, Azure slash API connections 3,
+Alesis, API, API connections, API connections,
+connections, category, web, file, icon slash Azure slash
+web slash 10048 icon service API connections dot SVG,
+Height 18.0, ID, Azure slash API connections 3, Provider,
+Azure, Width 18.0, Azure slash API for FHer, Alesis,
+API, API for FHer, API for FHer, FHer, 4, category,
+integration, file, icon slash Azure slash integration
+slash 10212 icon service Azure API for FHer dot SVG,
+Height 18.0, ID, Azure slash API for FHer, Provider,
+Azure, Width 18.0, Azure slash API management services,
+Alesis, API, API management services, API management services,
+management services, category, devops, file, icon slash
+Azure slash devops slash 10042 icon service API management
+services dot SVG, Height 18.0, ID, Azure slash API management
+services, Provider, Azure, Width 18.0, Azure slash API
+management services 2, Alesis, API, API management services,
+API management services, management services, category,
+integration, file, icon slash Azure slash integration slash
+10042 icon service API management services dot SVG, Height
+18.0, ID, Azure slash API management services 2,
+Provider, Azure, Width 18.0, Azure slash API management
+services 3, Alesis, API, API management services,
+API management services, management services, category,
+web, file, icon slash Azure slash web slash 10042 icon
+service API management services dot SVG, Height 18.0,
+ID, Azure slash API management services 3, Provider,
+Azure, Width 18.0, Azure slash API proxy, Alesis,
+API, API proxy, API proxy, proxy, category, identity,
+file, icon slash Azure slash identity slash 02386 icon
+service API proxy dot SVG, Height 18.0, ID, Azure slash
+API proxy, Provider, Azure, Width 18.0, Azure slash app
+compliance automation, Alesis, app, app compliance automation,
+app compliance automation.
+Automation, Compliance, Category, Other, File,
+icon slash Azure slash other slash 03071 icon service app
+compliance automation dot SVG,
+height 18.0 ID, Azure slash app compliance automation,
+provider, Azure, width, 18.0, Azure slash app configuration,
+aliases, app, app configuration,
+app configuration, configuration,
+category, integration, file, icon slash Azure slash
+integration slash 10,219 icon service app configuration
+dot SVG, height 18.0 ID, Azure slash app configuration,
+provider, Azure, width, 18.0, Azure slash app registrations,
+aliases, app, app registrations, app registrations,
+registrations, category, identity, file, icon slash
+Azure slash identity slash 10,232 icon service app
+registrations dot SVG, height 18.0 ID, Azure slash app
+registrations, provider, Azure, width, 18.0, Azure slash app
+registrations to aliases, app, app registrations, app
+registrations, registrations, category, other, file,
+icon slash Azure slash other slash 10,232 icon service app
+registrations dot SVG, height 18.0 ID, Azure slash app
+registrations to provider, Azure, width, 18.0, Azure slash app
+service certificates, aliases, app, app service
+certificates, app service certificates, certificates,
+service, category, app services, file, icon slash Azure slash
+app services slash 00049 icon service app service
+certificates dot SVG, height 18.0 ID, Azure slash app service
+certificates, provider, Azure, width, 18.0, Azure slash app
+service certificates to aliases, app, app service certificates,
+app service certificates, certificates, service, category,
+web, file, icons slash Azure slash web slash 00049 icon
+service app service certificates dot SVG, height 18.0 ID,
+Azure slash app service certificates to provider, Azure,
+width, 18.0, Azure slash app service domains, aliases, app
+app service domains, app service domains, domains, service,
+category, app services, file, icon slash Azure slash app
+services slash 00050 icon service app service domains dot
+SVG, height 18.0 ID, Azure slash app service domains,
+provider, Azure, width, 18.0, Azure slash app service
+domains too, aliases, app, app service domains, app service
+domains, domains, service, category, web, file, icons slash
+Azure slash web slash 00050 icon service app service
+domains dot SVG, height 18.0 ID, Azure slash app service
+domains too, provider, Azure, width 18.0, Azure slash app
+service environments, aliases, app, app service
+environments, app service environments, environments,
+service, category, app services, file, icons slash Azure
+slash app services slash 10,047 icon service app service
+environments dot SVG, height 18.0 ID, Azure slash app
+service environments, provider, Azure, width 18.0, Azure
+slash app service environments too, aliases, app, app service
+environments, app service environments, environments,
+service, category, web, file, icons slash Azure slash web
+slash 10,047 icon service app service environments dot SVG,
+height 18.0 ID, Azure slash app service environments too,
+provider, Azure, width 18.0, Azure slash app service
+plans, aliases, app, app service plans, app service plans,
+plans, service, category, app services, file, icons slash
+Azure slash app services slash 00046 icon service app
+service plans dot SVG, height 18.0 ID, Azure slash app
+service plans, provider, Azure, width 18.0, Azure slash app
+service plans too, aliases, app, app service plans, app
+service plans, plans, service, category, web, file, icons
+slash Azure slash web slash 00046 icon service app
+service plans dot SVG, height 18.0 ID, Azure slash app
+18.0 ID Azure slash app service plans to provider Azure with 18.0 Azure slash app services aliases app app services app services services category app services file icon slash Azure slash app services slash 1035 icon service app services dot SVG height 18.0 ID Azure slash app services provider Azure
+with 18.0 Azure slash app services to aliases app app services app services services category compute file icon slash Azure slash compute slash 1035 icon service app services dot SVG height 18.0 ID Azure slash app services to provider Azure with 18.0 Azure slash app services three aliases app
+app services app services services category containers file icon slash Azure slash container slash 1035 icon service app services dot SVG height 18.0 ID Azure slash app services three provider Azure with 18.0 Azure slash app services for aliases app app services app services services category mobile file
+icon slash Azure slash mobile slash 1035 icon service app services dot SVG height 18.0 ID Azure slash app services for provider Azure with 18.0 Azure slash app services five aliases app services app services services category web file icon slash Azure slash web slash 1035 icon service app services dot SVG
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+With 18.0, Azure Slash Application Insights,
+Alesis, Application, Application Insights,
+Application Insights, Insights, Category, DevOps,
+File, Icons Slash Azure Slash DevOps Slash
+0001 to icon service Application Insights dot
+SBG height 18.0, ID,
+Azure Slash Application Insights,
+Provider, Azure with 18.0,
+Azure Slash Application Insights 2,
+Alesis, Application, Application Insights,
+Application Insights, Insights,
+Category, Management plus Governance,
+File, Icons Slash Azure Slash Management
+plus Governance slash 0001 to icon service
+Application Insights dot SBG height 18.0,
+ID, Azure Slash Application Insights 2,
+Provider, Azure with 18.0,
+Azure Slash Application Insights 3,
+Alesis, Application, Application Insights,
+Application Insights, Insights,
+Category, Monitor, File, Icons Slash Azure
+Slash Monitor slash 0001 to icon service
+Application Insights dot SBG height 18.0,
+ID, Azure Slash Application Insights 3,
+Provider, Azure with 18.0,
+Azure Slash Application Security Groups,
+Alesis, Application, Application Security Groups,
+Application Security Groups,
+Groups, Security, Category, Security, File,
+Icons Slash Azure Slash Security slash 10244
+Rec on Service Application Security Groups dot SBG height
+18.0, ID, Azure Slash Application Security Groups,
+Provider, Azure with 18.0,
+Azure Slash Applied AI Services,
+Alesis, AI, Applied, Applied AI Services,
+Applied AI Services, Services,
+Category, AI plus Machine Learning,
+File, icon slash Azure slash AI plus Machine Learning
+slash 02749 icon service,
+Azure Applied AI Services dot SBG height 13.99,
+ID, Azure Slash Applied AI Services,
+Provider, Azure with 18.0,
+Azure Slash Aquila, Alesis, Aquila,
+Category, Other, File, Icons slash Azure slash
+Other slash 02625 icon service,
+Aquila dot SBG height 18.0,
+ID, Azure slash Aquila,
+Provider, Azure with 18.0,
+Azure slash Arc, Alesis, Arc,
+Category, Management plus Governance,
+File, Icons slash Azure slash Management
+plus Governance slash 00756 icon service,
+Azure Arc dot SBG height 18.0,
+ID, Azure slash Arc, Provider, Azure with 18.0,
+Azure slash Arc Data Services,
+Alesis, Arc, Arc Data Services,
+Arc Data Services, Data Services,
+Category, Other, File, Icons slash Azure slash Other
+slash 02356 icon service,
+Arc Data Services dot SBG height 18.0,
+ID, Azure slash Arc Data Services,
+Provider, Azure with 18.0,
+Azure slash Arc Kubernetes, Alesis,
+Arc, Arc Kubernetes, Arc Kubernetes,
+Kubernetes, Category, Other, File,
+Icons slash Azure slash Other slash 0108 icon service,
+Arc Kubernetes dot SBG height 18.0,
+ID, Azure slash Arc Kubernetes,
+Provider, Azure with 18.0,
+Azure slash Arc Machines, Alesis,
+Arc, Arc Machines, Arc Machines,
+Machines, Category, Management plus Governance,
+File, Icons slash Azure slash Management
+plus Governance slash 01710 icon service,
+Arc Machines dot SBG height 18.0,
+ID, Azure slash Arc Machines,
+Provider, Azure with 18.0,
+Azure slash Arc PostgreSQL,
+Alesis, Arc, Arc PostgreSQL,
+Arc PostgreSQL, PostgreSQL,
+SQL, Category, Other, File,
+Icons slash Azure slash Other slash 01848 icon service,
+Arc PostgreSQL dot SBG height 18.0,
+ID, Azure slash Arc PostgreSQL,
+Provider, Azure with 18.0,
+Azure slash Arc SQL Managed Instance,
+Alesis, Arc, Arc SQL Managed Instance,
+Arc SQL Managed Instance,
+Instance, Managed, SQL, Category, Other, File.
+icon slash Azure slash other slash 01849 icon service
+Arc SQL Managed Instance dot SVG height 18.0 ID Azure slash
+Arc SQL Managed Instance provider Azure with 18.0 Azure
+slash Arc SQL Server aliases arc arc SQL Server arc SQL Server
+server SQL category other file icon slash Azure slash other
+slash 01850 icon service Arc SQL Server dot SVG height 18.0 ID
+Azure slash Arc SQL Server provider Azure with 18.0 Azure
+slash ATM multistack aliases ATM ATM multistack ATM
+multistack multistack category networking file icon slash Azure
+slash networking slash 03460 icon service at a multistack dot
+SVG height 18.0 ID Azure slash ATM multistack provider Azure
+with 18.0 Azure slash attestation aliases as station
+category other file icon slash Azure slash other slash 10,422
+icon service Azure attestation dot SVG height 18.0 ID Azure
+slash attestation provider Azure with 18.0 Azure slash
+auto scale aliases auto auto scale auto scale scale
