@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import os
 import json
+import base64
 from pathlib import Path
 
 from archdiagram.emit.pdf import PdfDependencyError
-from archdiagram.engine import render_to_file, resolve_services
+from archdiagram.engine import render, render_to_file, resolve_services
 from archdiagram.formats import FORMATS
 from archdiagram.registry.catalog import get_catalog
 from archdiagram.spec.validate import SpecError, SpecValidationError, load_spec
@@ -16,6 +17,8 @@ from archdiagram.templates import get_template, list_templates as _list_template
 
 def validate_spec(spec_json: str, strict: bool = False) -> dict:
     """Validate a diagram spec and return all errors or a compact summary."""
+    if os.environ.get("PORT") and not spec_json.lstrip().startswith("{"):
+        return {"ok": False, "errors": ["Hosted validation requires JSON, not a server path"]}
     try:
         diagram = load_spec(spec_json)
         if strict:
@@ -45,6 +48,10 @@ def render_diagram(
     strict: bool = False,
 ) -> dict:
     """Render a JSON spec to pdf, drawio, vsdx, svg, html, or pptx."""
+    if os.environ.get("PORT"):
+        if icon_cache:
+            return {"ok": False, "errors": ["Hosted rendering does not accept local icon paths"]}
+        return generate_diagram(spec_json, fmt, strict=strict)
     try:
         diagram = load_spec(spec_json)
     except SpecError as exc:
@@ -147,22 +154,33 @@ def generate_diagram(spec: str | dict, format: str = "svg", out_path: str | None
                      strict: bool = False) -> dict:
     """Render a spec and return path, dimensions, counts, format, and warnings."""
     try:
+        hosted = bool(os.environ.get("PORT"))
+        if hosted and isinstance(spec, str) and not spec.lstrip().startswith("{"):
+            raise ValueError("Hosted rendering requires a JSON spec, not a server path")
+        if hosted and out_path:
+            raise ValueError("Hosted rendering does not accept server output paths")
         raw = _raw_spec(spec)
         if template:
             starter = get_template(template)
             raw.setdefault("direction", starter["direction"])
-        output_dir = Path(os.environ.get("ARCHDIAG_OUTPUT_DIR", "out"))
-        path = Path(out_path) if out_path else output_dir / f"diagram.{format}"
-        result = render_to_file(raw, format, str(path), strict=strict)
+        if hosted:
+            result = render(raw, format, strict=strict)
+            path = None
+        else:
+            output_dir = Path(os.environ.get("ARCHDIAG_OUTPUT_DIR", "out"))
+            path = Path(out_path) if out_path else output_dir / f"diagram.{format}"
+            result = render_to_file(raw, format, str(path), strict=strict)
     except (OSError, json.JSONDecodeError, ValueError, SpecError, PdfDependencyError) as exc:
         return {"ok": False, "errors": getattr(exc, "errors", [str(exc)])}
-    response = {"ok": True, "path": str(path.resolve()), "format": result.format.name,
+    response = {"ok": True, "path": str(path.resolve()) if path else None, "format": result.format.name,
                 "mime_type": result.format.mime_type, "bytes": len(result.content),
                 "nodes": len(result.diagram.nodes), "edges": len(result.diagram.edges),
                 "groups": len(result.diagram.groups), "width": result.width,
                 "height": result.height, "warnings": list(result.warnings),
                 "template": template}
-    if inline and not result.format.binary:
+    if hosted and result.format.binary:
+        response["content_base64"] = base64.b64encode(result.content).decode("ascii")
+    elif (inline or hosted) and not result.format.binary:
         response["content"] = result.content.decode("utf-8")
     return response
 

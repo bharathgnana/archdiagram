@@ -54,3 +54,26 @@ jobs:
         run: python -m pip install -e ".[mcp]"
       - name: Test SDK tool registration
         run: python -m unittest discover -s tests -p test_mcp_platform.py -v
+
+  mcp-container:
+    name: MCP container smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the deployable image
+        run: docker build --tag archdiagram-mcp:test .
+      - name: Start the Streamable HTTP MCP server
+        run: docker run --detach --rm --name archdiagram-mcp-test -e ARCHDIAGRAM_ACCESS_MODE=disabled -p 8080:8080 archdiagram-mcp:test
+      - name: Confirm the MCP endpoint accepts connections
+        run: |
+          for _ in {1..20}; do
+            if curl --silent --output /dev/null --connect-timeout 1 http://localhost:8080/mcp; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs archdiagram-mcp-test
+          exit 1
+      - name: Stop test container
+        if: always()
+        run: docker stop archdiagram-mcp-test || true

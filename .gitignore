@@ -37,3 +37,9 @@ out/
 # OS / editor
 .DS_Store
 Thumbs.db
+.gstack/
+
+# Terraform local cache and state (remote state is configured in Google Cloud)
+.terraform/
+*.tfstate
+*.tfstate.*

@@ -26,3 +26,13 @@ The resources `archdiag://schema` and `archdiag://catalog` give clients a compac
 schema and catalog summary. Prompts `describe_diagram` and
 `describe_architecture` guide spec creation. Set `ARCHDIAG_MANIFEST` to a
 generated icon manifest and `ARCHDIAG_OUTPUT_DIR` for default output paths.
+
+## Cloud Run
+
+Hosted rendering returns text content or base64-encoded binary content in the
+tool response; local paths and local icon caches are not accepted remotely.
+
+The container uses stdio locally and automatically switches to Streamable HTTP
+at `/mcp` when Cloud Run sets `PORT`. The GitHub OIDC deployment setup and
+one-time Google Cloud bootstrap are documented in
+[`mcp_deployment.md`](mcp_deployment.md).

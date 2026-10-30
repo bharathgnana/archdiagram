@@ -1,0 +1,21 @@
+# Keep Cloud Build uploads small and avoid sending generated or local files.
+.gcloudignore
+.git
+.gitignore
+.venv/
+venv/
+node/node_modules/
+icons/
+out/
+tests/
+docs/
+examples/
+dream-consolidation/
+transcript*.txt
+*.png
+*.pdf
+*.pptx
+*.vsdx
+*.drawio
+*.svg
+*.html

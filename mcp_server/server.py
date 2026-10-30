@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import os
+
+from .access import ApiKeyGate, hosted_access_settings
+
 from .tools import (
     catalog_resource,
     choose_template,
@@ -28,7 +32,9 @@ except ImportError as exc:  # pragma: no cover
         "    pip install \"archdiagram[mcp]\""
     ) from exc
 
-mcp = FastMCP("archdiagram")
+# A non-loopback host prevents FastMCP 1.x from enabling its localhost-only
+# DNS-rebinding allowlist. Cloud Run supplies the external listener.
+mcp = FastMCP("archdiagram", host="0.0.0.0", stateless_http=bool(os.environ.get("PORT")))
 
 for tool in (
     validate_spec,
@@ -51,8 +57,28 @@ mcp.prompt()(describe_diagram)
 mcp.prompt()(describe_architecture)
 
 
+def hosted_app():
+    """Return the Cloud Run ASGI app protected by buyer-specific API keys."""
+    if os.environ.get("ARCHDIAGRAM_ACCESS_MODE", "api-key") == "disabled":
+        return mcp.streamable_http_app()
+    if os.environ.get("ARCHDIAGRAM_ACCESS_MODE", "api-key") != "api-key":
+        raise RuntimeError("ARCHDIAGRAM_ACCESS_MODE must be 'disabled' or 'api-key'")
+    store, pepper = hosted_access_settings()
+    if not pepper:
+        raise RuntimeError("ARCHDIAGRAM_API_KEY_PEPPER must be configured for hosted access")
+    return ApiKeyGate(mcp.streamable_http_app(), store, pepper)
+
+
 def main() -> None:
-    mcp.run()
+    # Stdio remains the right default for a locally configured MCP server.
+    # Cloud Run provides PORT when this module is deployed as a service.
+    port = os.environ.get("PORT")
+    if port:
+        import uvicorn
+
+        uvicorn.run(hosted_app(), host="0.0.0.0", port=int(port))
+    else:
+        mcp.run()
 
 
 if __name__ == "__main__":

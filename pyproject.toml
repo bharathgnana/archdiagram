@@ -17,7 +17,7 @@ dependencies = []
 
 [project.optional-dependencies]
 # The MCP server subpackage is the ONLY place the mcp SDK is used.
-mcp = ["mcp>=1.2.0,<2"]
+mcp = ["mcp>=1.28,<2"]
 
 [project.scripts]
 archdiagram = "archdiagram.cli:main"
