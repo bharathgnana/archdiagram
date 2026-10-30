@@ -281,6 +281,9 @@ def emit_pptx(diagram: Diagram, out_path: str, *, icon_cache: str | None = None,
              + _tree_start() + ''.join(shapes) + '</p:spTree></p:cSld>'
              '<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>')
     static = Path(__file__).with_name("pptx_parts")
+    def static_part(name: str) -> bytes:
+        # Preserve the established golden bytes across Git checkout platforms.
+        return (static / name).read_text(encoding="utf-8").replace("\n", "\r\n").encode("utf-8")
     presentation = (static / "presentation.xml").read_text(encoding="utf-8")
     slide_width = max(layout.width, (layout.height+36)*16/9) if modern else layout.width
     slide_height = max(layout.height+36, layout.width*9/16) if modern else layout.height+36
@@ -318,19 +321,19 @@ def emit_pptx(diagram: Diagram, out_path: str, *, icon_cache: str | None = None,
         write_stable(zf, 'ppt/slides/slide1.xml', slide)
         write_stable(zf, 'ppt/slides/_rels/slide1.xml.rels', _rels(slide_rels))
         write_stable(zf, 'ppt/slideLayouts/slideLayout1.xml',
-                     (static / 'slideLayout1.xml').read_bytes())
+                     static_part('slideLayout1.xml'))
         write_stable(zf, 'ppt/slideLayouts/_rels/slideLayout1.xml.rels', _rels([
             ('rId1', f'{R}/slideMaster', '../slideMasters/slideMaster1.xml'),
         ]))
         write_stable(zf, 'ppt/slideMasters/slideMaster1.xml',
-                     (static / 'slideMaster1.xml').read_bytes())
+                     static_part('slideMaster1.xml'))
         write_stable(zf, 'ppt/slideMasters/_rels/slideMaster1.xml.rels', _rels([
             ('rId1', f'{R}/slideLayout', '../slideLayouts/slideLayout1.xml'),
             ('rId12', f'{R}/theme', '../theme/theme1.xml'),
         ]))
         for name in ('theme1.xml', 'presProps.xml', 'viewProps.xml', 'tableStyles.xml'):
             part = ('ppt/theme/theme1.xml' if name == 'theme1.xml' else f'ppt/{name}')
-            write_stable(zf, part, (static / name).read_bytes())
+            write_stable(zf, part, static_part(name))
         for fname, data in media.items():
             write_stable(zf, f'ppt/media/{fname}', data)
     return warnings

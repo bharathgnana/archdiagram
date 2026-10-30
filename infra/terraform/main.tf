@@ -12,6 +12,7 @@ data "google_project" "current" {
 resource "google_project_service" "required" {
   for_each = toset([
     "artifactregistry.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
     "firestore.googleapis.com",
     "iamcredentials.googleapis.com",
     "run.googleapis.com",
