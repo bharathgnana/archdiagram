@@ -222,6 +222,18 @@ class BillingTests(unittest.TestCase):
         self.assertEqual(account["subscriptionId"], "sub_new")
         self.assertEqual(account["usageCount"], 17)
 
+    def test_concurrent_replacement_cannot_clear_another_checkout_reservation(self):
+        self.associate()
+        self.provider.sub['status'] = 'cancelled'
+        def concurrent(owner):
+            account, revision = self.store.get(self.path)
+            account.update({'subscriptionId': '', 'checkoutIntent': 'another-request', 'paidThrough': 0})
+            self.store.commit([(self.path, account, revision)])
+            return account
+        with patch.object(self.service, 'refresh', side_effect=concurrent), self.assertRaises(BillingError):
+            self.service.checkout(self.owner)
+        self.assertEqual(self.store.get(self.path)[0]['checkoutIntent'], 'another-request')
+
     def test_cancellation_is_idempotent(self):
         self.associate()
         self.service.cancel(self.owner)

@@ -257,7 +257,8 @@ class BillingService:
         path = "billing_accounts/" + owner
         account, revision = self.store.get(path)
         if account.get("subscriptionId"):
-            subscription = self.provider.subscription(account["subscriptionId"])
+            existing_sub_id = account["subscriptionId"]
+            subscription = self.provider.subscription(existing_sub_id)
             if subscription.get("status") in ("created", "authenticated"):
                 return {"checkoutUrl": checkout_url(subscription.get("short_url", ""))}
             if subscription.get("status") not in ("cancelled", "completed", "expired"):
@@ -266,6 +267,8 @@ class BillingService:
             if account.get("paidThrough", 0) > int(time.time()) or account.get("suspended"):
                 raise BillingError("The previous subscription still has paid access or requires support.", 409)
             account, revision = self.store.get(path)
+            if account.get("subscriptionId") != existing_sub_id:
+                raise BillingError("Checkout changed. Refresh before retrying.", 409)
             account.update({"previousSubscriptionId": account["subscriptionId"],
                             "subscriptionId": "", "checkoutIntent": ""})
         if account.get("checkoutIntent"):
