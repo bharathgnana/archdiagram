@@ -24,9 +24,16 @@ The key is kept in the page's password field, not browser storage.
    settings. `/mcp` must remain in API-key mode. An API key is independently
    sufficient to use MCP. There is not yet a verified association between a
    signed-in email and a buyer's key.
-4. Issue buyer keys only after independently verifying their subscription;
-   Agensi billing synchronization and self-service key provisioning are not
-   yet connected. Do not grant access just because an email address signs in.
+4. Configure [direct Razorpay billing](razorpay-billing.md) for checkout,
+   payment verification, cancellation, and self-service keys. The Agensi
+   connector is free and conveys no paid entitlement. Billing stays disabled
+   until its merchant plan and secrets are configured. Do not grant access
+   just because an email address signs in.
+
+Keys issued through direct billing are associated with a verified account.
+Each hosted request checks the account's paid-through date, suspension, and
+current key ID; replacements preserve account quota. Existing administrator
+keys continue to follow the manual access policy and are not account-bound.
 
 Render requests count against the key's existing monthly quota. SVG can be
 previewed in a sandboxed frame; the other supported formats can be downloaded.

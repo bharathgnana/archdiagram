@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "archdiagram": {
+      "type": "http",
+      "url": "https://archdiagram-mcp-moryq375tq-el.a.run.app/mcp",
+      "headers": {
+        "Authorization": "Bearer ${ARCHDIAGRAM_API_KEY}"
+      }
+    }
+  }
+}

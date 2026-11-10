@@ -5,7 +5,7 @@ const $ = id => document.getElementById(id);
 const example = {title:'Order approval',direction:'LR',nodes:[{id:'start',shape:'start',label:'Start'},{id:'submit',shape:'process',label:'Submit order'},{id:'review',shape:'decision',label:'Approved?'},{id:'end',shape:'end',label:'Complete'}],edges:[{source:'start',target:'submit'},{source:'submit',target:'review'},{source:'review',target:'end',label:'Yes'}]};
 $('spec').value = JSON.stringify(example, null, 2);
 $('example').onclick = () => { $('spec').value = JSON.stringify(example, null, 2); };
-let auth, downloadUrl;
+let auth, downloadUrl, billingConfig, billingAccount;
 const status = (id, message) => { $(id).textContent = message; };
 function explain(error) {
   const messages = {'auth/unauthorized-domain':'This domain is not authorized for sign-in. Contact the service administrator.', 'auth/operation-not-allowed':'Email link sign-in has not been enabled yet.', 'auth/invalid-action-code':'This sign-in link has expired or was already used. Request a new one.', 'auth/invalid-email':'Enter a valid email address.', 'auth/too-many-requests':'Too many attempts. Please try again later.'};
@@ -24,11 +24,13 @@ try {
       catch (error) { status('login-message', explain(error)); }
     } else { status('login-message', 'Enter your email to finish sign-in, or request a new link.'); }
   }
-  onAuthStateChanged(auth, user => {
+  onAuthStateChanged(auth, async user => {
     const signedIn = Boolean(user && user.emailVerified);
     $('login').hidden = signedIn; $('studio').hidden = !signedIn; $('logout').hidden = !signedIn; $('account').hidden = !signedIn;
     $('account').textContent = signedIn ? user.email : '';
-    if (!signedIn) $('api-key').value = '';
+    $('issued-key').value = ''; $('new-key').hidden = true;
+    if (!signedIn) { $('api-key').value = ''; billingAccount = null; }
+    else await refreshBilling();
   });
 } catch (error) {
   $('send-link').disabled = true;
@@ -41,6 +43,81 @@ $('login-form').onsubmit = async event => {
   catch (error) { status('login-message', explain(error)); }
   finally { $('send-link').disabled = false; }
 };
+
+async function billingRequest(path, method = 'GET') {
+  if (!auth?.currentUser?.emailVerified) throw Error('Please sign in first.');
+  const response = await fetch('/api/billing/' + path, {method, cache:'no-store',
+    headers:{'X-Firebase-Token':await auth.currentUser.getIdToken()}});
+  const result = await response.json();
+  if (!response.ok) throw Error(result.error || 'Unable to contact the billing service.');
+  return result;
+}
+function billingButtons(busy = false) {
+  const enabled = Boolean(billingConfig?.enabled);
+  const subscribed = billingAccount && !['none','created','authenticated','cancelled','completed','expired'].includes(billingAccount.status);
+  $('subscribe').disabled = busy || !enabled || Boolean(subscribed) || Boolean(billingAccount?.active);
+  $('refresh-billing').disabled = busy || !enabled;
+  $('issue-key').disabled = busy || !billingAccount?.active;
+  $('issue-key').textContent = billingAccount?.hasKey ? 'Replace API key' : 'Create API key';
+  $('cancel-subscription').hidden = !subscribed || Boolean(billingAccount?.cancellationRequested);
+  $('cancel-subscription').disabled = busy;
+}
+async function refreshBilling() {
+  billingButtons(true);
+  try {
+    const response = await fetch('/api/billing/config', {cache:'no-store'});
+    if (!response.ok) throw Error('Unable to check payment availability. Refresh to try again.');
+    billingConfig = await response.json();
+    if (!billingConfig.enabled) {
+      status('billing-summary', 'Payments are not available yet. Please check back soon.');
+      return;
+    }
+    const price = new Intl.NumberFormat(undefined, {style:'currency', currency:billingConfig.currency}).format(billingConfig.amount / 100);
+    $('plan-price').textContent = price + ' / month';
+    $('subscribe').textContent = 'Subscribe for ' + price + '/month';
+    const user = auth.currentUser;
+    const account = await billingRequest('status');
+    if (auth.currentUser !== user) return;
+    billingAccount = account;
+    const through = account.paidThrough ? new Date(account.paidThrough * 1000).toLocaleDateString() : '';
+    status('billing-summary', (billingConfig.testMode ? 'Test payments. ' : '') +
+      (account.active ? `${account.cancellationRequested ? 'Renewal cancelled. ' : ''}Paid access through ${through}. ${account.usageCount} of ${account.monthlyLimit} requests used this month.` :
+       `No confirmed paid access. ${price}/month includes ${billingConfig.monthlyLimit} requests. Renews monthly for up to ${billingConfig.totalCycles} cycles; cancel renewal here.`));
+    status('billing-message', '');
+  } catch (error) { status('billing-message', error.message); }
+  finally { billingButtons(); }
+}
+$('refresh-billing').onclick = refreshBilling;
+$('subscribe').onclick = async () => {
+  billingButtons(true);
+  try { const result = await billingRequest('checkout', 'POST'); location.assign(result.checkoutUrl); }
+  catch (error) { status('billing-message', error.message); billingButtons(); }
+};
+$('issue-key').onclick = async () => {
+  if (billingAccount?.hasKey && !window.confirm('Replace your API key? Your previous key will stop working immediately.')) return;
+  billingButtons(true);
+  try {
+    const user = auth.currentUser;
+    const result = await billingRequest('key', 'POST');
+    if (auth.currentUser !== user) return;
+    $('issued-key').value = result.apiKey; $('api-key').value = result.apiKey; $('new-key').hidden = false;
+    billingAccount.hasKey = true;
+    status('billing-message', 'API key created. Save it in your agent’s secret settings now.');
+  } catch (error) { status('billing-message', error.message); }
+  finally { billingButtons(); }
+};
+$('copy-key').onclick = async () => {
+  try { await navigator.clipboard.writeText($('issued-key').value); status('billing-message', 'API key copied.'); }
+  catch { status('billing-message', 'Clipboard access was denied. Select and copy the key manually.'); $('issued-key').type = 'text'; $('issued-key').select(); }
+};
+$('cancel-subscription').onclick = async () => {
+  if (!window.confirm('Cancel monthly renewal? Your paid access will continue until the end of its paid period.')) return;
+  billingButtons(true);
+  try { const result = await billingRequest('cancel', 'POST'); await refreshBilling(); status('billing-message', result.message); }
+  catch (error) { status('billing-message', error.message); }
+  finally { billingButtons(); }
+};
+window.addEventListener('pagehide', () => { $('issued-key').value = ''; $('api-key').value = ''; });
 $('logout').onclick = async () => {
   $('api-key').value = ''; $('preview-frame').removeAttribute('src'); $('preview-frame').hidden = true;
   $('empty-preview').hidden = false; $('download').disabled = true;

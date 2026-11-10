@@ -6,6 +6,7 @@ import os
 
 from .access import ApiKeyGate, hosted_access_settings
 from .web import BrowserApp
+from .billing import BillingApp, BillingService, BillingSettings, BillingStore
 
 from .tools import (
     catalog_resource,
@@ -61,13 +62,21 @@ mcp.prompt()(describe_architecture)
 def hosted_app():
     """Return the Cloud Run ASGI app protected by buyer-specific API keys."""
     if os.environ.get("ARCHDIAGRAM_ACCESS_MODE", "api-key") == "disabled":
-        return BrowserApp(mcp.streamable_http_app())
+        if os.environ.get("ARCHDIAGRAM_BILLING_ENABLED", "false") == "true":
+            raise RuntimeError("Billing requires API-key access mode")
+        return BillingApp(BrowserApp(mcp.streamable_http_app()), None)
     if os.environ.get("ARCHDIAGRAM_ACCESS_MODE", "api-key") != "api-key":
         raise RuntimeError("ARCHDIAGRAM_ACCESS_MODE must be 'disabled' or 'api-key'")
     store, pepper = hosted_access_settings()
     if not pepper:
         raise RuntimeError("ARCHDIAGRAM_API_KEY_PEPPER must be configured for hosted access")
-    return BrowserApp(ApiKeyGate(mcp.streamable_http_app(), store, pepper), store, pepper)
+    settings = BillingSettings.from_env()
+    billing = None
+    if settings:
+        billing_store = BillingStore(os.environ.get("GOOGLE_CLOUD_PROJECT", ""),
+                                     os.environ.get("ARCHDIAGRAM_FIRESTORE_DATABASE", "(default)"))
+        billing = BillingService(settings, billing_store, pepper)
+    return BillingApp(BrowserApp(ApiKeyGate(mcp.streamable_http_app(), store, pepper), store, pepper), billing)
 
 
 def main() -> None:
