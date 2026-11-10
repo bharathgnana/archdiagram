@@ -18,19 +18,26 @@ from .tools import generate_diagram
 ASSETS = Path(__file__).parent / "web_assets"
 
 
-def verify_browser_identity(token: str, api_key: str) -> bool:
+def browser_identity(token: str, api_key: str) -> dict | None:
     """Have Identity Platform verify the token and the email ownership claim."""
     if not token or not api_key:
-        return False
+        return None
     url = "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=" + urllib.parse.quote(api_key, safe="")
     request = urllib.request.Request(url, data=json.dumps({"idToken": token}).encode(),
                                      headers={"Content-Type": "application/json"}, method="POST")
     try:
         with urllib.request.urlopen(request, timeout=8) as response:
             users = json.load(response).get("users", [])
-        return len(users) == 1 and bool(users[0].get("email")) and users[0].get("emailVerified") is True
+        if (len(users) == 1 and users[0].get("localId") and users[0].get("email")
+                and users[0].get("emailVerified") is True and not users[0].get("disabled")):
+            return {"uid": users[0]["localId"], "email": users[0]["email"]}
     except (OSError, ValueError, KeyError):
-        return False
+        return None
+    return None
+
+
+def verify_browser_identity(token: str, api_key: str) -> bool:
+    return browser_identity(token, api_key) is not None
 
 
 class BrowserApp:

@@ -61,6 +61,13 @@ jobs:
           TF_VAR_container_image: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REPOSITORY }}/archdiagram-mcp:${{ github.sha }}
           TF_VAR_firebase_web_api_key: ${{ vars.FIREBASE_WEB_API_KEY }}
           TF_VAR_firebase_auth_domain: ${{ vars.FIREBASE_AUTH_DOMAIN }}
+          TF_VAR_billing_enabled: ${{ vars.BILLING_ENABLED || 'false' }}
+          TF_VAR_razorpay_key_id: ${{ vars.RAZORPAY_KEY_ID }}
+          TF_VAR_razorpay_plan_id: ${{ vars.RAZORPAY_PLAN_ID }}
+          TF_VAR_razorpay_key_secret_name: ${{ vars.RAZORPAY_KEY_SECRET_NAME || 'archdiagram-razorpay-key-secret' }}
+          TF_VAR_razorpay_webhook_secret_name: ${{ vars.RAZORPAY_WEBHOOK_SECRET_NAME || 'archdiagram-razorpay-webhook-secret' }}
+          TF_VAR_plan_amount: ${{ vars.PLAN_AMOUNT || '500' }}
+          TF_VAR_plan_currency: ${{ vars.PLAN_CURRENCY || 'USD' }}
         run: |
           terraform init -input=false -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" -backend-config="prefix=archdiagram-mcp"
           terraform apply -input=false -auto-approve

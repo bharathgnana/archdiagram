@@ -48,12 +48,18 @@ To release manually, run **Deploy MCP** from the repository's Actions tab.
 
 ## Issue, revoke, and rotate buyer keys
 
-After an Agensi purchase, issue a buyer key from an administrator workstation:
+The Agensi connector is free. Hosted subscriptions are paid directly through
+Razorpay. Configure the gateway and self-service key issuance using
+[razorpay-billing.md](razorpay-billing.md). Do not use an Agensi install or
+claimed purchase as evidence of paid hosted access.
+
+For an administrator-approved legacy/manual entitlement, issue a key from an
+administrator workstation after independently verifying access:
 
 ```powershell
 $env:GOOGLE_CLOUD_PROJECT = "agensi-mcp-188309590003"
 $env:ARCHDIAGRAM_API_KEY_PEPPER = gcloud secrets versions access latest --secret archdiagram-api-key-pepper --project $env:GOOGLE_CLOUD_PROJECT
-python scripts/issue_api_key.py --buyer "agensi-purchase-id" --monthly-limit 1000
+python scripts/issue_api_key.py --buyer "verified-manual-entitlement-reference" --monthly-limit 1000
 ```
 
 The command prints the plaintext key once. Send it through a secure support

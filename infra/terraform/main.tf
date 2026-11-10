@@ -3,6 +3,10 @@ locals {
   runtime_account  = "archdiagram-runtime"
   pool_id          = "github-actions"
   provider_id      = "archdiagram"
+  billing_secrets = var.billing_enabled ? {
+    RAZORPAY_KEY_SECRET     = var.razorpay_key_secret_name
+    RAZORPAY_WEBHOOK_SECRET = var.razorpay_webhook_secret_name
+  } : {}
 }
 
 data "google_project" "current" {
@@ -62,6 +66,14 @@ resource "google_project_iam_member" "runtime_firestore" {
   project = var.project_id
   role    = "roles/datastore.user"
   member  = "serviceAccount:${google_service_account.runtime.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "runtime_billing" {
+  for_each  = local.billing_secrets
+  project   = var.project_id
+  secret_id = each.value
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.runtime.email}"
 }
 
 resource "google_secret_manager_secret_iam_member" "runtime_api_key_pepper" {
@@ -144,6 +156,15 @@ resource "google_cloud_run_v2_service" "mcp" {
   ingress              = "INGRESS_TRAFFIC_ALL"
   invoker_iam_disabled = true
 
+  depends_on = [google_secret_manager_secret_iam_member.runtime_billing]
+
+  lifecycle {
+    precondition {
+      condition     = !var.billing_enabled || (var.razorpay_key_id != "" && var.razorpay_plan_id != "" && var.firebase_web_api_key != "")
+      error_message = "Billing requires a Razorpay key ID, plan ID, and configured Firebase sign-in."
+    }
+  }
+
   template {
     service_account                  = google_service_account.runtime.email
     timeout                          = "300s"
@@ -155,6 +176,38 @@ resource "google_cloud_run_v2_service" "mcp" {
 
     containers {
       image = var.container_image
+
+      env {
+        name  = "ARCHDIAGRAM_BILLING_ENABLED"
+        value = tostring(var.billing_enabled)
+      }
+
+      dynamic "env" {
+        for_each = var.billing_enabled ? {
+          RAZORPAY_KEY_ID           = var.razorpay_key_id
+          RAZORPAY_PLAN_ID          = var.razorpay_plan_id
+          ARCHDIAGRAM_PLAN_AMOUNT   = tostring(var.plan_amount)
+          ARCHDIAGRAM_PLAN_CURRENCY = var.plan_currency
+          ARCHDIAGRAM_MONTHLY_LIMIT = "1000"
+        } : {}
+        content {
+          name  = env.key
+          value = env.value
+        }
+      }
+
+      dynamic "env" {
+        for_each = local.billing_secrets
+        content {
+          name = env.key
+          value_source {
+            secret_key_ref {
+              secret  = env.value
+              version = "latest"
+            }
+          }
+        }
+      }
 
       env {
         name  = "ARCHDIAGRAM_ACCESS_MODE"

@@ -15,6 +15,7 @@ import hmac
 import json
 import os
 import secrets
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -167,6 +168,15 @@ class FirestoreQuotaStore:
             expected = _string(fields, "secretHash")
             if not hmac.compare_digest(expected, secret_digest):
                 raise InvalidApiKey("Unknown API key")
+            billing_account = _string(fields, "billingAccountId")
+            if billing_account:
+                # Paid keys share account usage, so rotating a key cannot reset quota.
+                account_path = f"/billing_accounts/{urllib.parse.quote(billing_account, safe='')}"
+                document = self._request("GET", f"{account_path}?transaction={urllib.parse.quote(transaction, safe='')}", token)
+                fields = document.get("fields", {})
+                if (_string(fields, "keyId") != key_id or _boolean(fields, "suspended")
+                        or _integer(fields, "paidThrough") <= int(time.time())):
+                    raise InvalidApiKey("Paid access has expired, is suspended, or this key was replaced")
             limit = _integer(fields, "monthlyLimit", DEFAULT_MONTHLY_LIMIT)
             count = _integer(fields, "usageCount") if _string(fields, "usageMonth") == month else 0
             if count >= limit:

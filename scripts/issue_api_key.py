@@ -26,7 +26,7 @@ def access_token() -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Issue an ArchDiagram MCP buyer API key")
-    parser.add_argument("--buyer", required=True, help="Buyer reference, such as their Agensi purchase ID")
+    parser.add_argument("--buyer", required=True, help="Independently verified manual entitlement reference; Agensi installs do not grant paid access")
     parser.add_argument("--monthly-limit", type=int, default=DEFAULT_MONTHLY_LIMIT)
     parser.add_argument("--project", default=os.environ.get("GOOGLE_CLOUD_PROJECT"))
     parser.add_argument("--database", default=os.environ.get("ARCHDIAGRAM_FIRESTORE_DATABASE", "(default)"))
